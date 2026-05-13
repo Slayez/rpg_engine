@@ -1,0 +1,20 @@
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .app-container { padding: 8px; }
+  .chat-window { height: 60vh; }
+  .input-area { flex-direction: column; gap: 8px; }
+  .input-area input, .input-area textarea { font-size: 16px; min-height: 50px; }
+  .action-buttons { flex-wrap: wrap; justify-content: center; }
+  .action-buttons button { min-width: 44px; min-height: 44px; margin: 4px; }
+  .stats-panel { display: none; }
+  .stats-panel.mobile-open { display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; background: #1a1a2e; padding: 20px; overflow-y: auto; }
+  .mobile-menu-toggle { display: block !important; }
+  .message-actions button { min-width: 36px; min-height: 36px; }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-toggle { display: none !important; }
+}
+
+.touch-action-manipulation { touch-action: manipulation; }
+.large-touch-target { min-width: 44px; min-height: 44px; }

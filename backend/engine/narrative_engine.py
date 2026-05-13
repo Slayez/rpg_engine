@@ -4,7 +4,7 @@ import json, copy, logging, asyncio
 from world_state import WorldState
 from memory import LongTermMemory
 from llm_client import LLMClient
-from .action_resolver import ActionResolver
+from .action_resolver import IntentParser, ActionExecutor, StateApplier
 from .narration import NarrationGenerator
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,10 @@ class NarrativeEngine:
         self.world = world
         self.memory = memory
         self.llm = LLMClient()
-        self.resolver = ActionResolver(world)
+        # Разделение ответственности
+        self.intent_parser = IntentParser(world, self.llm)
+        self.action_executor = ActionExecutor(world)
+        self.state_applier = StateApplier(world)
         self.narrator = NarrationGenerator(self)
         self.history = []
         self.action_stack = []
@@ -82,20 +85,73 @@ class NarrativeEngine:
 
     async def stream_process_action(self, player_action: str):
         old_state = copy.deepcopy(self.world.state)
-        result = await self.resolver.resolve_all(player_action)
+        
+        # 1. Парсинг интентов (IntentParser)
+        intents = await self.intent_parser.extract_intents(player_action)
+        if not intents:
+            intents = [{"action_type": "other", "description": player_action}]
+        
+        # 2. Выполнение всех интентов и сбор изменений (ActionExecutor)
+        combined = {
+            "allowed": True,
+            "updates": [],
+            "memory": [],
+            "narrator_contexts": [],
+            "system_messages": [],
+        }
+        
+        for intent in intents:
+            action_type = intent.get("action_type")
+            if action_type == "repeat_skill":
+                result = await self.action_executor._handle_repeat_skill(intent)
+            elif action_type == "use_skill":
+                result = self.action_executor._handle_skill(intent)
+            elif action_type == "attack":
+                result = self.action_executor._handle_attack(intent)
+            elif action_type == "interact":
+                result = self.action_executor._handle_interact(intent)
+            elif action_type == "move":
+                result = self.action_executor._handle_move(intent)
+            elif action_type == "talk":
+                result = self.action_executor._handle_talk(intent)
+            else:
+                result = self.action_executor._handle_generic(intent)
 
-        if not result["allowed"]:
-            error_msg = result["reason"]
+            if not result["allowed"]:
+                error_msg = result["reason"]
+                self.add_to_history("user", player_action)
+                self.add_to_history("assistant", error_msg)
+                self._save_chat_history()
+                yield f"data: {json.dumps({'type':'done','narration':error_msg,'world_state':self.world.snapshot()})}\n\n"
+                return
+
+            combined["updates"].extend(result.get("updates", []))
+            combined["memory"].extend(result.get("memory", []))
+            if "narrator_context" in result:
+                combined["narrator_contexts"].append(result["narrator_context"])
+            if "system_message" in result:
+                combined["system_messages"].append(result["system_message"])
+        
+        result = combined
+        self._save_checkpoint()
+
+        # 3. Атомарное применение изменений (StateApplier)
+        self.state_applier.begin_transaction()
+        try:
+            updates_dict = {}
+            for upd in result.get("updates", []):
+                updates_dict[upd["key"]] = upd["value"]
+            self.state_applier.bulk_update(updates_dict)
+            self.state_applier.commit()
+        except Exception as e:
+            logger.error(f"Transaction failed: {e}")
+            self.state_applier.rollback()
+            error_msg = f"Ошибка применения изменений: {str(e)}"
             self.add_to_history("user", player_action)
             self.add_to_history("assistant", error_msg)
             self._save_chat_history()
             yield f"data: {json.dumps({'type':'done','narration':error_msg,'world_state':self.world.snapshot()})}\n\n"
             return
-
-        self._save_checkpoint()
-
-        for upd in result.get("updates", []):
-            self.world.update(upd["key"], upd["value"])
 
         mem_ids = []
         for mem_text in result.get("memory", []):
@@ -107,11 +163,8 @@ class NarrativeEngine:
         self.world.reduce_cooldowns()
         self.world.enforce_resource_limits()
 
-        skill_msgs_str = result.get("system_messages", [])   # список строк
-        # Преобразуем в список словарей
+        skill_msgs_str = result.get("system_messages", [])
         skill_msgs = [{"text": msg, "type": "skill_use"} for msg in skill_msgs_str]
-
-        # Сообщения об уроне окружению уже включены в skill_msgs, но для единообразия оставим пустой env_msgs
         env_msgs = []
         system_messages = self._build_system_messages(old_state, self.world.state, env_msgs, skill_msgs)
 
@@ -148,12 +201,64 @@ class NarrativeEngine:
     async def process_action(self, player_action: str):
         """Нестримовая версия (используется для undo/retry/edit). Возвращает (narration, system_messages)."""
         old_state = copy.deepcopy(self.world.state)
-        result = await self.resolver.resolve_all(player_action)
-        if not result["allowed"]:
-            return result["reason"], []
+        
+        # 1. Парсинг интентов (IntentParser)
+        intents = await self.intent_parser.extract_intents(player_action)
+        if not intents:
+            intents = [{"action_type": "other", "description": player_action}]
+        
+        # 2. Выполнение всех интентов и сбор изменений (ActionExecutor)
+        combined = {
+            "allowed": True,
+            "updates": [],
+            "memory": [],
+            "narrator_contexts": [],
+            "system_messages": [],
+        }
+        
+        for intent in intents:
+            action_type = intent.get("action_type")
+            if action_type == "repeat_skill":
+                result = await self.action_executor._handle_repeat_skill(intent)
+            elif action_type == "use_skill":
+                result = self.action_executor._handle_skill(intent)
+            elif action_type == "attack":
+                result = self.action_executor._handle_attack(intent)
+            elif action_type == "interact":
+                result = self.action_executor._handle_interact(intent)
+            elif action_type == "move":
+                result = self.action_executor._handle_move(intent)
+            elif action_type == "talk":
+                result = self.action_executor._handle_talk(intent)
+            else:
+                result = self.action_executor._handle_generic(intent)
+
+            if not result["allowed"]:
+                return result["reason"], []
+
+            combined["updates"].extend(result.get("updates", []))
+            combined["memory"].extend(result.get("memory", []))
+            if "narrator_context" in result:
+                combined["narrator_contexts"].append(result["narrator_context"])
+            if "system_message" in result:
+                combined["system_messages"].append(result["system_message"])
+        
+        result = combined
         self._save_checkpoint()
-        for upd in result.get("updates", []):
-            self.world.update(upd["key"], upd["value"])
+
+        # 3. Атомарное применение изменений (StateApplier)
+        self.state_applier.begin_transaction()
+        try:
+            updates_dict = {}
+            for upd in result.get("updates", []):
+                updates_dict[upd["key"]] = upd["value"]
+            self.state_applier.bulk_update(updates_dict)
+            self.state_applier.commit()
+        except Exception as e:
+            logger.error(f"Transaction failed: {e}")
+            self.state_applier.rollback()
+            return f"Ошибка применения изменений: {str(e)}", []
+
         for mem_text in result.get("memory", []):
             self.memory.add_memory(mem_text)
         self.world.apply_passive_regen()
