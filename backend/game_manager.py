@@ -18,23 +18,38 @@ class GameManager:
     def list_saves(self):
         saves = []
         if not os.path.isdir(SAVES_DIR):
+            logger.warning(f"Saves directory does not exist: {SAVES_DIR}")
             return saves
-        for slot_id in os.listdir(SAVES_DIR):
+        
+        try:
+            slot_ids = os.listdir(SAVES_DIR)
+        except Exception as e:
+            logger.error(f"Error listing saves directory: {e}")
+            return saves
+        
+        for slot_id in slot_ids:
             save_file = os.path.join(SAVES_DIR, slot_id, "world_state.json")
             if os.path.isfile(save_file):
                 try:
                     with open(save_file, 'r', encoding='utf-8') as f:
                         data = json.load(f)
+                    
+                    player_data = data.get("characters", {}).get("player", {})
+                    stats = player_data.get("stats", {})
+                    
                     saves.append({
                         "slot_id": slot_id,
-                        "player_name": data.get("characters", {}).get("player", {}).get("name", "???"),
-                        "race": data.get("characters", {}).get("player", {}).get("race", "???"),
-                        "level": data.get("characters", {}).get("player", {}).get("stats", {}).get("level", 1),
+                        "player_name": player_data.get("name", "Неизвестно"),
+                        "race": player_data.get("race", "???"),
+                        "level": stats.get("level", 1),
                         "location": data.get("location", "???"),
                         "name": f"Мир {slot_id[:6]}"
                     })
-                except:
-                    pass
+                except json.JSONDecodeError as e:
+                    logger.error(f"Invalid JSON in save file {save_file}: {e}")
+                except Exception as e:
+                    logger.error(f"Error reading save file {save_file}: {e}")
+        
         return saves
 
     def create_world(self, player_name: str, race_id: str) -> str:

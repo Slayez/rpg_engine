@@ -4,8 +4,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from game_manager import GameManager
-import config   # <-- простой импорт, не from backend
+import config
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,9 +16,19 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 manager = GameManager()
 
+@app.on_event("startup")
+async def startup_event():
+    """Инициализация при запуске приложения."""
+    os.makedirs(config.SAVES_DIR, exist_ok=True)
+    logger.info(f"Saves directory: {os.path.abspath(config.SAVES_DIR)}")
+
 @app.get("/saves", response_model=List[WorldListItem])
 def list_saves():
-    return manager.list_saves()
+    try:
+        return manager.list_saves()
+    except Exception as e:
+        logger.error(f"Error listing saves: {e}")
+        return []
 
 @app.post("/saves", response_model=dict)
 def create_world(req: CreateWorldRequest):
