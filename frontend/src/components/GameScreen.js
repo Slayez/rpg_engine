@@ -4,9 +4,10 @@ import VirtualizedChatWindow from './VirtualizedChatWindow';
 import InputBox from './InputBox';
 import CharacterPanel from './CharacterPanel';
 import QuestPanel from './QuestPanel';
+import InteractiveScene from './InteractiveScene';
 import { useGameState } from '../hooks/useGameState';
 import { useSystemMessages } from '../hooks/useSystemMessages';
-import { fetchMemory } from '../api';
+import { fetchMemory, getScene, movePlayer, interactWithObject } from '../api';
 import './GameScreen.css';
 import LocationInfo from './LocationInfo';
 
@@ -21,6 +22,10 @@ function GameScreen({ slotId, onBack }) {
   const [memoryEntries, setMemoryEntries] = useState([]);
   const [editModal, setEditModal] = useState({ show: false, index: null, originalText: '' });
   const [useVirtualization, setUseVirtualization] = useState(false);
+  
+  // Visual mode state
+  const [visualMode, setVisualMode] = useState(false);
+  const [sceneData, setSceneData] = useState(null);
 
   // Включаем виртуализацию при 100+ сообщениях
   useEffect(() => {
@@ -30,6 +35,58 @@ function GameScreen({ slotId, onBack }) {
       setUseVirtualization(false);
     }
   }, [messages.length]);
+
+  // Загрузка сцены при переключении в визуальный режим
+  useEffect(() => {
+    if (visualMode && slotId) {
+      loadScene();
+    }
+  }, [visualMode, slotId, worldState?.location]);
+
+  const loadScene = async () => {
+    try {
+      const data = await getScene(slotId);
+      if (data.scene) {
+        setSceneData(data.scene);
+      }
+    } catch (e) {
+      console.error('Failed to load scene:', e);
+    }
+  };
+
+  // Обработка клика по объекту сцены
+  const handleSceneObjectClick = async (actionData) => {
+    try {
+      const result = await interactWithObject(slotId, actionData.target_id, actionData.interaction);
+      if (result.success) {
+        // Отправка действия в игровой движок
+        const actionText = `${actionData.interaction} ${actionData.target_id}`;
+        const sysMsgs = await streamAction(actionText);
+        if (sysMsgs) applyBorderAnimation(sysMsgs);
+        
+        // Перезагрузка сцены после действия
+        setTimeout(loadScene, 500);
+      }
+    } catch (e) {
+      console.error('Scene interaction error:', e);
+    }
+  };
+
+  // Обработка правого клика (контекстное меню)
+  const handleSceneRightClick = (menuData) => {
+    console.log('Context menu:', menuData);
+  };
+
+  // Обработка перемещения игрока
+  const handleSceneMove = async (moveData) => {
+    try {
+      await movePlayer(slotId, moveData.target_x, moveData.target_y);
+      // Обновление позиции в сцене
+      setTimeout(loadScene, 300);
+    } catch (e) {
+      console.error('Move error:', e);
+    }
+  };
 
   // Состояние поля ввода (живёт здесь, не теряется при смене вкладки)
   const [inputText, setInputText] = useState('');
@@ -53,6 +110,11 @@ function GameScreen({ slotId, onBack }) {
     const sysMsgs = await streamAction(action);
     if (sysMsgs) applyBorderAnimation(sysMsgs);
     loadMemory();
+    
+    // Если в визуальном режиме - обновить сцену
+    if (visualMode) {
+      setTimeout(loadScene, 500);
+    }
   };
 
   const openEditModal = (index) => setEditModal({ show: true, index, originalText: messages[index].text });
@@ -77,34 +139,76 @@ function GameScreen({ slotId, onBack }) {
           <li className="nav-item"><button className={`nav-link ${activeTab==='quests'?'active':''}`} onClick={()=>setActiveTab('quests')}>📜 Задания</button></li>
           <li className="nav-item"><button className={`nav-link ${activeTab==='memory'?'active':''}`} onClick={()=>{setActiveTab('memory');loadMemory();}}>🧠 Память</button></li>
         </ul>
+        <button 
+          className={`btn-outline ${visualMode ? 'active' : ''}`}
+          onClick={() => setVisualMode(!visualMode)}
+          title="Переключить визуальный режим"
+        >
+          {visualMode ? '🎨 Визуальный' : '📝 Текст'}
+        </button>
       </div>
 
       {activeTab === 'chat' && (
         <div className={`chat-panel-wrapper ${chatBorderAnim}`}>
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <LocationInfo worldState={worldState} />
-            <div className="card-panel" style={{ flex: 1, height: '70vh', display: 'flex', flexDirection: 'column' }}>
-              <div className="chat-container">
-                <ChatComponent
-                  messages={displayMessages}
-                  onDeleteMessage={() => handleUndo()}
-                  onEditMessage={openEditModal}
-                  onRetryMessage={handleRetry}
-                  isStreaming={streaming}
-                  editStartIndex={initialHistoryLen}
+          {visualMode && sceneData ? (
+            // Визуальный режим с интерактивной сценой
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <InteractiveScene
+                scene={sceneData}
+                onObjectClick={handleSceneObjectClick}
+                onObjectRightClick={handleSceneRightClick}
+                onMove={handleSceneMove}
+                showGrid={false}
+              />
+              <div className="card-panel" style={{ flex: 1, height: '40vh', display: 'flex', flexDirection: 'column' }}>
+                <div className="chat-container" style={{ flex: 1 }}>
+                  <ChatComponent
+                    messages={displayMessages.slice(-20)}
+                    onDeleteMessage={() => handleUndo()}
+                    onEditMessage={openEditModal}
+                    onRetryMessage={handleRetry}
+                    isStreaming={streaming}
+                    editStartIndex={initialHistoryLen}
+                  />
+                </div>
+                <InputBox
+                  text={inputText}
+                  onTextChange={setInputText}
+                  history={inputHistory}
+                  historyIndex={inputHistoryIndex}
+                  onHistoryIndexChange={setInputHistoryIndex}
+                  onSend={handleSend}
+                  disabled={streaming}
                 />
               </div>
-              <InputBox
-                text={inputText}
-                onTextChange={setInputText}
-                history={inputHistory}
-                historyIndex={inputHistoryIndex}
-                onHistoryIndexChange={setInputHistoryIndex}
-                onSend={handleSend}
-                disabled={streaming}
-              />
             </div>
-          </div>
+          ) : (
+            // Текстовый режим
+            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <LocationInfo worldState={worldState} />
+              <div className="card-panel" style={{ flex: 1, height: '70vh', display: 'flex', flexDirection: 'column' }}>
+                <div className="chat-container">
+                  <ChatComponent
+                    messages={displayMessages}
+                    onDeleteMessage={() => handleUndo()}
+                    onEditMessage={openEditModal}
+                    onRetryMessage={handleRetry}
+                    isStreaming={streaming}
+                    editStartIndex={initialHistoryLen}
+                  />
+                </div>
+                <InputBox
+                  text={inputText}
+                  onTextChange={setInputText}
+                  history={inputHistory}
+                  historyIndex={inputHistoryIndex}
+                  onHistoryIndexChange={setInputHistoryIndex}
+                  onSend={handleSend}
+                  disabled={streaming}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

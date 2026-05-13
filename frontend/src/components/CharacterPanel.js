@@ -1,6 +1,7 @@
 import React from 'react';
 import { RACES } from '../api';
 import SkillDescription from './SkillDescription';
+import InventoryGrid from './InventoryGrid';
 import './CharacterPanel.css';
 import { STAT_LABELS } from '../utils/statLabels';
 
@@ -61,6 +62,17 @@ function CharacterPanel({ worldState }) {
         })}
         {totalDefense > 0 && <div className="stat-item"><span>🛡️ Общая защита</span><span>{totalDefense}</span></div>}
       </div>
+      
+      {/* Grid-инвентарь с drag-and-drop */}
+      <InventoryGrid
+        inventory={inventory}
+        equipment={{}}
+        onEquip={(itemId) => console.log('Equip:', itemId)}
+        onUnequip={(itemId) => console.log('Unequip:', itemId)}
+        onMoveItem={(itemId, slot) => console.log('Move:', itemId, slot)}
+        onItemClick={(item) => console.log('Item click:', item)}
+      />
+      
       {equipped.length > 0 && (
         <div className="mt-3">
           <h6>Экипировка</h6>

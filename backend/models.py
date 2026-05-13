@@ -124,3 +124,44 @@ class GenerateSkillsResponse(BaseModel):
 class ChooseSkillsRequest(BaseModel):
     slot_id: str
     skills: List[Skill]
+
+# ---------- Модели для интерактивной сцены ----------
+class SceneMoveRequest(BaseModel):
+    slot_id: str
+    x: int
+    y: int
+
+class SceneInteractRequest(BaseModel):
+    slot_id: str
+    object_id: str
+    action: str
+
+class SceneObject(BaseModel):
+    id: str
+    type: str  # npc, enemy, chest, door, interactive
+    name: str
+    x: int
+    y: int
+    icon: str = "❓"
+    hp: Optional[int] = None
+    max_hp: Optional[int] = None
+    damage: Optional[int] = None
+    description: Optional[str] = ""
+    interactions: List[str] = Field(default_factory=list)
+
+class ScenePlayer(BaseModel):
+    x: int
+    y: int
+    icon: str = "🧙"
+    facing: str = "right"  # left, right, up, down
+
+class SceneData(BaseModel):
+    type: str  # room, outdoor, dungeon
+    width: int = 800
+    height: int = 600
+    objects: List[SceneObject] = Field(default_factory=list)
+    player: Optional[ScenePlayer] = None
+
+class SceneResponse(BaseModel):
+    scene: Optional[SceneData] = None
+    error: Optional[str] = None

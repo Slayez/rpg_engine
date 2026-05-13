@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import MainMenu from './components/MainMenu';
 import CharacterCreation from './components/CharacterCreation';
 import GameScreen from './components/GameScreen';
+import './styles/skillAnimations.css';
 // Глобальные стили уже импортированы в index.js
 
 function App() {

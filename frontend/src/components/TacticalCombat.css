@@ -1,0 +1,285 @@
+/* frontend/src/components/TacticalCombat.css */
+/* Тактический интерфейс боя */
+
+.tactical-combat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  border: 2px solid var(--border);
+}
+
+/* Таймлайн инициативы */
+.initiative-timeline {
+  width: 100%;
+  max-width: 600px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+
+.timeline-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.timeline-units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeline-unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.timeline-unit.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.timeline-unit .unit-icon {
+  font-size: 20px;
+}
+
+.timeline-unit .unit-name {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.turn-indicator {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Боевая сетка */
+.tactical-grid-container {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tactical-grid {
+  display: grid;
+  position: relative;
+}
+
+.grid-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.grid-cell:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.grid-cell.highlighted {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.grid-cell.movable {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.grid-cell.movable:hover {
+  background: rgba(102, 126, 234, 0.4);
+}
+
+.grid-cell.attack-zone {
+  background: rgba(255, 68, 68, 0.2);
+}
+
+.grid-cell.attack-zone:hover {
+  background: rgba(255, 68, 68, 0.4);
+}
+
+.grid-cell.hidden {
+  background: #1a1a1a;
+  border-color: #2a2a2a;
+  cursor: default;
+}
+
+.cell-coords {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+}
+
+/* Юниты на сетке */
+.game-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+  user-select: none;
+}
+
+.game-unit:hover {
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+.game-unit.selected {
+  filter: drop-shadow(0 0 8px gold);
+}
+
+.game-unit.player {
+  filter: drop-shadow(0 0 5px blue);
+}
+
+.game-unit.enemy {
+  filter: drop-shadow(0 0 5px red);
+  animation: enemyPulse 2s infinite;
+}
+
+@keyframes enemyPulse {
+  0%, 100% { filter: drop-shadow(0 0 5px red); }
+  50% { filter: drop-shadow(0 0 15px red); }
+}
+
+.game-unit.dragging {
+  opacity: 0.5;
+}
+
+.unit-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.unit-hp-bar {
+  width: 80%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff4444, #ff6b6b);
+  transition: width 0.3s;
+}
+
+.unit-name-tag {
+  font-size: 10px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Информация о выбранном юните */
+.selected-unit-info {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.selected-unit-info h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.unit-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.unit-skills {
+  margin-top: 12px;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.skill-btn {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.skill-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.skill-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Слой эффектов */
+.combat-effects-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .tactical-combat {
+    padding: 12px;
+  }
+
+  .initiative-timeline {
+    max-width: 100%;
+  }
+
+  .timeline-units {
+    flex-direction: column;
+  }
+
+  .selected-unit-info {
+    max-width: 100%;
+  }
+}

@@ -298,3 +298,137 @@ class WorldState:
         except Exception:
             pass
         return []
+
+    def generate_scene_from_location(self) -> dict:
+        """Авто-генерация сцены на основе текущей локации."""
+        location = self.get("location", "Неизвестно")
+        location_desc = self.get("location_description", "")
+        
+        # Определение типа локации по названию и описанию
+        location_lower = location.lower()
+        desc_lower = location_desc.lower()
+        
+        scene_type = "room"  # по умолчанию
+        if any(word in location_lower for word in ["лес", "forest", "поле", "field", "гор", "mountain", "пустош", "waste"]):
+            scene_type = "outdoor"
+        elif any(word in location_lower for word in ["подземель", "dungeon", "пещер", "cave", "склеп", "crypt"]):
+            scene_type = "dungeon"
+        
+        # Генерация объектов сцены на основе контекста
+        objects = []
+        
+        # Добавляем врагов из world_state
+        enemies = self.get("enemies", [])
+        for i, enemy in enumerate(enemies):
+            enemy_icon = "👹"  # default
+            if enemy.get("type") == "beast":
+                enemy_icon = "🐺"
+            elif enemy.get("type") == "undead":
+                enemy_icon = "💀"
+            elif enemy.get("type") == "human":
+                enemy_icon = "🗡️"
+            
+            objects.append({
+                "id": enemy.get("id", f"enemy_{i}"),
+                "type": "enemy",
+                "name": enemy.get("name", "Враг"),
+                "x": 400 + (i * 80),  # распределение по сцене
+                "y": 300 + (i % 3) * 50,
+                "icon": enemy_icon,
+                "hp": enemy.get("health", 25),
+                "max_hp": enemy.get("max_health", 25),
+                "damage": enemy.get("damage", 5),
+                "interactions": ["attack", "inspect"]
+            })
+        
+        # Добавление интерактивных объектов на основе описания локации
+        if "таверн" in location_lower or "tavern" in location_lower:
+            objects.append({
+                "id": "npc_innkeeper",
+                "type": "npc",
+                "name": "Трактирщик",
+                "x": 500,
+                "y": 250,
+                "icon": "👨‍🍳",
+                "interactions": ["talk", "trade", "rent_room"]
+            })
+            objects.append({
+                "id": "door_exit",
+                "type": "door",
+                "name": "Выход",
+                "x": 400,
+                "y": 100,
+                "icon": "🚪",
+                "interactions": ["leave"]
+            })
+        
+        if "алтар" in location_lower or "altar" in location_lower:
+            objects.append({
+                "id": "altar",
+                "type": "interactive",
+                "name": "Древний алтарь",
+                "x": 400,
+                "y": 200,
+                "icon": "🗿",
+                "description": "Покрытый рунами алтарь излучает слабое свечение.",
+                "interactions": ["pray", "inspect", "offer"]
+            })
+        
+        # Позиция игрока
+        player_pos = self.get("player_position", {"x": 200, "y": 300})
+        
+        return {
+            "scene": {
+                "type": scene_type,
+                "width": 800,
+                "height": 600,
+                "objects": objects,
+                "player": {
+                    "x": player_pos.get("x", 200),
+                    "y": player_pos.get("y", 300),
+                    "icon": "🧙",
+                    "facing": player_pos.get("facing", "right")
+                }
+            }
+        }
+
+    def move_player_to(self, x: int, y: int) -> bool:
+        """Перемещение игрока в новые координаты."""
+        # Проверка границ
+        if x < 0 or x > 800 or y < 0 or y > 600:
+            return False
+        
+        self.update("player_position", {"x": x, "y": y, "facing": "right"})
+        return True
+
+    def interact_with_object(self, object_id: str, action: str) -> dict:
+        """Взаимодействие с объектом сцены."""
+        # Поиск объекта в сцене или врагах
+        scene_data = self.generate_scene_from_location()
+        objects = scene_data.get("scene", {}).get("objects", [])
+        
+        target_obj = None
+        for obj in objects:
+            if obj.get("id") == object_id:
+                target_obj = obj
+                break
+        
+        if not target_obj:
+            return {"success": False, "message": "Объект не найден"}
+        
+        if action not in target_obj.get("interactions", []):
+            return {"success": False, "message": "Недоступное действие"}
+        
+        # Обработка действий
+        result = {
+            "success": True,
+            "object_id": object_id,
+            "action": action,
+            "message": f"Вы взаимодействуете с {target_obj['name']}: {action}"
+        }
+        
+        if target_obj["type"] == "enemy" and action == "attack":
+            result["combat"] = True
+            result["target"] = target_obj
+        
+        return result

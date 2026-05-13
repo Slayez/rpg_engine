@@ -4,6 +4,7 @@ import App from './App';
 import ToastProvider from './components/ToastNotifications';
 import './styles/global.css';
 import './styles/mobile.css';
+import './styles/skillAnimations.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

@@ -203,3 +203,597 @@
   border-color: #ff4500;
   background: linear-gradient(135deg, rgba(255,69,0,0.2) 0%, rgba(200,0,0,0.1) 100%);
 }
+
+/* ===== ВИЗУАЛЬНЫЕ ЭФФЕКТЫ ДЛЯ БОЯ И ДЕЙСТВИЙ ===== */
+
+/* Анимация атаки (вспышка удара) */
+@keyframes attackSlash {
+  0% { transform: rotate(-45deg) scale(0); opacity: 0; }
+  50% { transform: rotate(0deg) scale(1.5); opacity: 1; }
+  100% { transform: rotate(45deg) scale(0); opacity: 0; }
+}
+
+.attack-effect {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+  animation: attackSlash 0.4s ease-out;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Всплывающий урон */
+@keyframes damageFloat {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+}
+
+.damage-popup {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff4444;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  animation: damageFloat 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* Всплывающее лечение */
+@keyframes healFloat {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+}
+
+.heal-popup {
+  color: #44ff44;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  animation: healFloat 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* Критический удар - тряска экрана */
+@keyframes screenShake {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  10% { transform: translateX(-10px) translateY(-5px); }
+  20% { transform: translateX(10px) translateY(5px); }
+  30% { transform: translateX(-10px) translateY(-5px); }
+  40% { transform: translateX(10px) translateY(5px); }
+  50% { transform: translateX(-8px) translateY(-4px); }
+  60% { transform: translateX(8px) translateY(4px); }
+  70% { transform: translateX(-6px) translateY(-3px); }
+  80% { transform: translateX(6px) translateY(3px); }
+  90% { transform: translateX(-4px) translateY(-2px); }
+}
+
+.crit-hit {
+  animation: screenShake 0.5s ease-out;
+}
+
+/* Пульсация HP/MP при изменении */
+@keyframes hpPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.3); }
+}
+
+.hp-change {
+  animation: hpPulse 0.3s ease-in-out;
+}
+
+.hp-decrease {
+  color: #ff4444;
+}
+
+.hp-increase {
+  color: #44ff44;
+}
+
+@keyframes mpPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.3); }
+}
+
+.mp-change {
+  animation: mpPulse 0.3s ease-in-out;
+}
+
+.mp-decrease {
+  color: #4444ff;
+}
+
+.mp-increase {
+  color: #44ffff;
+}
+
+/* Частицы для заклинаний */
+@keyframes particleFloat {
+  0% { 
+    transform: translateY(0) translateX(0) scale(1); 
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-100px) translateX(50px) scale(0); 
+    opacity: 0;
+  }
+}
+
+.spell-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleFloat 1.5s ease-out forwards;
+}
+
+.spell-particle.fire {
+  background: radial-gradient(circle, #ff6600, #ff0000);
+  box-shadow: 0 0 10px #ff6600;
+}
+
+.spell-particle.ice {
+  background: radial-gradient(circle, #00ffff, #0088ff);
+  box-shadow: 0 0 10px #00ffff;
+}
+
+.spell-particle.arcane {
+  background: radial-gradient(circle, #ff00ff, #8800ff);
+  box-shadow: 0 0 10px #ff00ff;
+}
+
+.spell-particle.holy {
+  background: radial-gradient(circle, #ffff00, #ffffff);
+  box-shadow: 0 0 10px #ffff00;
+}
+
+/* Эффект снаряда */
+@keyframes projectileFly {
+  0% { 
+    transform: translate(0, 0) scale(0.5); 
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% { 
+    transform: translate(var(--target-x, 100px), var(--target-y, -100px)) scale(1); 
+    opacity: 0;
+  }
+}
+
+.projectile {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: projectileFly 0.5s ease-in forwards;
+}
+
+.projectile.fire {
+  background: radial-gradient(circle, #ffcc00, #ff6600, #ff0000);
+  box-shadow: 0 0 20px #ff6600;
+}
+
+.projectile.ice {
+  background: radial-gradient(circle, #ffffff, #00ffff, #0088ff);
+  box-shadow: 0 0 20px #00ffff;
+}
+
+.projectile.arcane {
+  background: radial-gradient(circle, #ffffff, #ff00ff, #8800ff);
+  box-shadow: 0 0 20px #ff00ff;
+}
+
+/* Зона атаки (подсветка) */
+.attack-zone {
+  position: absolute;
+  background: radial-gradient(circle, rgba(255, 0, 0, 0.3) 0%, transparent 70%);
+  border: 2px dashed rgba(255, 0, 0, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: zonePulse 1s infinite;
+}
+
+@keyframes zonePulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Зона видимости */
+.vision-zone {
+  position: absolute;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.2) 0%, transparent 70%);
+  border: 2px solid rgba(108, 99, 255, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Индикатор инициативы (таймлайн) */
+.initiative-timeline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.initiative-slot {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 2px solid var(--border);
+  transition: all 0.2s;
+}
+
+.initiative-slot.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px var(--accent-glow);
+  animation: currentTurn 1s infinite;
+}
+
+@keyframes currentTurn {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.initiative-slot.enemy {
+  background: rgba(255, 0, 0, 0.2);
+}
+
+.initiative-slot.ally {
+  background: rgba(0, 255, 0, 0.2);
+}
+/* ========== ФАЗА 2: Визуальные эффекты ========== */
+
+/* Урон (всплывающие цифры) */
+.damage-popup {
+  position: absolute;
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff4444;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  animation: damageFloat 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+@keyframes damageFloat {
+  0% { 
+    transform: translateY(0) scale(1); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateY(-60px) scale(1.3); 
+    opacity: 0; 
+  }
+}
+
+/* Критический урон */
+.crit-damage-popup {
+  font-size: 36px;
+  color: #ffaa00;
+  text-shadow: 0 0 10px #ffaa00, 2px 2px 0 #000;
+  animation: critDamageFloat 1.2s ease-out forwards;
+}
+
+@keyframes critDamageFloat {
+  0% { 
+    transform: translateY(0) scale(1) rotate(-5deg); 
+    opacity: 1; 
+  }
+  50% {
+    transform: translateY(-30px) scale(1.5) rotate(5deg);
+  }
+  100% { 
+    transform: translateY(-80px) scale(1.2) rotate(0deg); 
+    opacity: 0; 
+  }
+}
+
+/* Лечение */
+.heal-popup {
+  color: #44ff44;
+  text-shadow: 0 0 10px #44ff44, 2px 2px 0 #000;
+  animation: healFloat 1s ease-out forwards;
+}
+
+@keyframes healFloat {
+  0% { 
+    transform: translateY(0) scale(1); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateY(-50px) scale(1.3); 
+    opacity: 0; 
+  }
+}
+
+/* Тряска экрана при критическом уроне */
+.screen-shake {
+  animation: screenShake 0.4s ease-out;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  10% { transform: translateX(-10px) translateY(-5px); }
+  20% { transform: translateX(10px) translateY(5px); }
+  30% { transform: translateX(-10px) translateY(-5px); }
+  40% { transform: translateX(10px) translateY(5px); }
+  50% { transform: translateX(-10px) translateY(-5px); }
+  60% { transform: translateX(10px) translateY(5px); }
+  70% { transform: translateX(-10px) translateY(-5px); }
+  80% { transform: translateX(10px) translateY(5px); }
+  90% { transform: translateX(-10px) translateY(-5px); }
+}
+
+/* Пульсация HP/MP при изменении */
+.hp-pulse-up {
+  animation: hpPulseUp 0.5s ease-out;
+}
+
+@keyframes hpPulseUp {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.hp-pulse-down {
+  animation: hpPulseDown 0.5s ease-out;
+}
+
+@keyframes hpPulseDown {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(0.95); filter: brightness(0.7); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.mp-pulse {
+  animation: mpPulse 0.4s ease-out;
+}
+
+@keyframes mpPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Частицы для заклинаний */
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleFly 1s ease-out forwards;
+}
+
+@keyframes particleFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 50px), var(--ty, -100px)) scale(0);
+  }
+}
+
+/* Огненные частицы */
+.fire-particle {
+  background: radial-gradient(circle, #ffaa00, #ff4400);
+  box-shadow: 0 0 10px #ff4400;
+}
+
+/* Ледяные частицы */
+.ice-particle {
+  background: radial-gradient(circle, #aaffff, #0088ff);
+  box-shadow: 0 0 8px #0088ff;
+}
+
+/* Магические частицы */
+.arcane-particle {
+  background: radial-gradient(circle, #ff88ff, #8800ff);
+  box-shadow: 0 0 12px #8800ff;
+  animation: particleFly 1.2s ease-out forwards, particleRotate 0.8s linear infinite;
+}
+
+@keyframes particleRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Снаряды */
+.projectile {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.projectile-fireball {
+  background: radial-gradient(circle, #ffff00, #ff4400);
+  border-radius: 50%;
+  box-shadow: 0 0 20px #ff4400, 0 0 40px #ff8800;
+  animation: projectileFly 0.6s ease-in forwards;
+}
+
+.projectile-arrow {
+  width: 30px;
+  height: 6px;
+  background: linear-gradient(90deg, #888, #ccc);
+  clip-path: polygon(0% 50%, 80% 50%, 100% 0%, 100% 100%, 80% 50%);
+  animation: projectileFly 0.4s linear forwards;
+}
+
+.projectile-bolt {
+  width: 8px;
+  height: 30px;
+  background: linear-gradient(180deg, #00ffff, #0088ff);
+  border-radius: 4px;
+  box-shadow: 0 0 15px #00ffff;
+  animation: projectileFly 0.5s ease-out forwards;
+}
+
+@keyframes projectileFly {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 200px), var(--ty, 0)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Зоны атаки (подсветка) */
+.attack-zone-highlight {
+  position: absolute;
+  background: rgba(255, 68, 68, 0.3);
+  border: 2px dashed rgba(255, 68, 68, 0.6);
+  border-radius: 8px;
+  animation: zonePulse 1s infinite;
+  pointer-events: none;
+}
+
+@keyframes zonePulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+/* Зона лечения */
+.heal-zone-highlight {
+  background: rgba(68, 255, 68, 0.3);
+  border-color: rgba(68, 255, 68, 0.6);
+}
+
+/* Зона заклинания */
+.spell-zone-highlight {
+  background: rgba(136, 0, 255, 0.3);
+  border-color: rgba(136, 0, 255, 0.6);
+}
+
+/* Эффект получения урона юнитом */
+.unit-hit {
+  animation: unitHitFlash 0.3s ease-out;
+}
+
+@keyframes unitHitFlash {
+  0% { filter: brightness(1); }
+  30% { filter: brightness(2) sepia(1) hue-rotate(-50deg); }
+  100% { filter: brightness(1); }
+}
+
+/* Эффект смерти юнита */
+.unit-death {
+  animation: unitFadeOut 1s ease-out forwards;
+}
+
+@keyframes unitFadeOut {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+/* ========== ФАЗА 3: Улучшения инвентаря ========== */
+
+/* Анимация получения предмета */
+.item-acquired {
+  animation: itemAcquired 0.5s ease-out;
+}
+
+@keyframes itemAcquired {
+  0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+  70% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Подсветка нового предмета */
+.item-new {
+  animation: newItemGlow 2s infinite;
+}
+
+@keyframes newItemGlow {
+  0%, 100% { box-shadow: 0 0 10px #44ff44; }
+  50% { box-shadow: 0 0 25px #44ff44; }
+}
+
+/* Анимация экипировки */
+.equip-animation {
+  animation: equipItem 0.4s ease-out;
+}
+
+@keyframes equipItem {
+  0% { transform: scale(1.3); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Drag-and-drop визуализация */
+.dragging-ghost {
+  opacity: 0.7;
+  transform: scale(1.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Drop zone highlight */
+.drop-zone-valid {
+  background: rgba(68, 255, 68, 0.3);
+  border-color: #44ff44;
+}
+
+.drop-zone-invalid {
+  background: rgba(255, 68, 68, 0.3);
+  border-color: #ff4444;
+}
+
+/* Авто-сортировка анимация */
+.inventory-sorting .item {
+  transition: all 0.3s ease;
+}
+
+/* Сравнение предметов (tooltip) */
+.comparison-tooltip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.comparison-column {
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.comparison-current {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.comparison-new {
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid #667eea;
+}
+
+.stat-better {
+  color: #44ff44;
+  font-weight: bold;
+}
+
+.stat-worse {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+.stat-equal {
+  color: var(--text-secondary);
+}
