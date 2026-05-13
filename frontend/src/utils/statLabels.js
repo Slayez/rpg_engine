@@ -1,0 +1,22 @@
+export const STAT_LABELS = {
+  level: 'Уровень',
+  exp: 'Опыт',
+  hp: 'HP',
+  mp: 'MP',
+  strength: 'Сила',
+  dexterity: 'Ловкость',
+  intelligence: 'Интеллект',
+  vitality: 'Живучесть',
+  wisdom: 'Мудрость',
+  luck: 'Удача',
+  defense: 'Защита',
+  magic_defense: 'Маг. защита',
+  speed: 'Скорость',
+  accuracy: 'Меткость',
+  evasion: 'Уклонение',
+  crit_rate: 'Крит. шанс',
+  crit_damage: 'Крит. урон',
+  hp_regen: 'Реген. HP',
+  mp_regen: 'Реген. MP',
+  charisma: 'Харизма'
+};

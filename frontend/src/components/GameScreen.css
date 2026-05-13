@@ -1,0 +1,17 @@
+/* ---------- Память ---------- */
+.memory-panel {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Закрепляем форму внизу панели чата */
+.chat-panel-wrapper .card-panel {
+  display: flex;
+  flex-direction: column;
+}
+.chat-panel-wrapper .chat-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 12px; /* небольшой отступ перед формой */
+}

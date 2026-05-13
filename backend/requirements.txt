@@ -1,0 +1,9 @@
+fastapi==0.110.1
+uvicorn==0.27.1
+openai==1.13.3
+chromadb==0.5.5
+pydantic==2.6.3
+python-dotenv==1.0.1
+json-repair==0.17.0
+torch==2.5.1
+transformers==4.38.1

@@ -1,0 +1,410 @@
+@import './skillAnimations.css';
+
+:root {
+  --bg-primary: #0a0c0f;
+  --bg-secondary: #151821;
+  --bg-card: rgba(18, 22, 30, 0.9);
+  --accent: #6c63ff;
+  --accent-glow: rgba(108, 99, 255, 0.6);
+  --gold: #f1c40f;
+  --text-primary: #e4e8f0;
+  --text-muted: #8892a4;
+  --border: #2a2e3b;
+  --danger: #e74c3c;
+  --success: #2ecc71;
+}
+
+[data-bs-theme="light"] {
+  --bg-primary: #f5f6fa;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --accent: #6c63ff;
+  --accent-glow: rgba(108, 99, 255, 0.3);
+  --gold: #d4a017;
+  --text-primary: #1e1e2f;
+  --text-muted: #6c757d;
+  --border: #d1d5db;
+  --danger: #c0392b;
+  --success: #27ae60;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at top, var(--bg-secondary), var(--bg-primary) 70%);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.card-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 16px 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.btn-primary {
+  background: linear-gradient(135deg, #6c63ff, #4a47d9);
+  border: none; color: white; font-weight: 600;
+  padding: 10px 24px; border-radius: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(108,99,255,0.4);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,99,255,0.6); }
+.btn-outline {
+  background: transparent; border: 1px solid var(--accent);
+  color: var(--accent); border-radius: 10px; padding: 8px 18px; transition: all 0.2s;
+}
+.btn-outline:hover { background: rgba(108,99,255,0.1); }
+.theme-toggle-container { text-align: right; padding: 10px 20px; }
+
+.skill-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px 20px 8px 20px;
+  padding: 20px 24px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  min-height: 180px;
+  opacity: 1;   /* <-- добавлено */
+}
+
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.skill-name {
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- Сетка описания навыка ---------- */
+.skill-desc-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 10px;
+  font-size: 0.9rem;
+}
+.skill-desc-item {
+  display: contents;
+}
+.skill-desc-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.skill-desc-value {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ---------- Категории ---------- */
+.category-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 6px;
+  margin: 24px 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ---------- Подсветка игровых механик ---------- */
+.mech-value {
+  color: var(--gold);
+  font-weight: 600;
+}
+.mech-dice {
+  color: #ff8c42;
+  font-weight: bold;
+}
+.mech-type {
+  color: #4ecdc4;
+  font-weight: 500;
+}
+.mech-keyword {
+  color: var(--success);
+  font-weight: 500;
+  font-style: italic;
+}
+.mech-damage { color: #e25822; font-weight: bold; }
+.mech-heal { color: #27ae60; font-weight: bold; }
+.mech-defense { color: #4a90d9; font-weight: bold; }
+
+/* ===== Дополнительные стили для внутренностей карточки ArcheAge ===== */
+.skill-card .skill-aa-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.skill-card .skill-aa-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  flex-grow: 1;
+}
+.skill-card .skill-aa-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.skill-card .skill-aa-badge.active {
+  background: rgba(108,99,255,0.2);
+  color: var(--accent);
+}
+.skill-card .skill-aa-badge.passive {
+  background: rgba(241,196,15,0.2);
+  color: var(--gold);
+}
+.skill-card .skill-aa-level {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.skill-card .skill-aa-flavor {
+  font-style: italic;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.skill-card .skill-aa-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.skill-card .stat-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+.skill-card .stat-label {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+.skill-card .stat-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.skill-card .skill-aa-damage {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.skill-card .skill-aa-effect {
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.skill-card .skill-aa-requirements {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ===== Сообщения чата ===== */
+.message {
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  transition: background 0.2s;
+}
+.message.user {
+  background: rgba(108, 99, 255, 0.12);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+}
+.message.assistant {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+}
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.message-actions button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 0.9rem;
+}
+.message-actions button:hover {
+  color: var(--accent);
+}
+
+/* Системные сообщения */
+.system-message {
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  margin: 8px 0;
+  color: var(--gold);
+  background: rgba(241, 196, 15, 0.08);
+  border-radius: 20px;
+  display: inline-block;
+  width: auto;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  animation: fadeInUp 0.3s ease;
+}
+
+/* ===== Модальное окно редактирования ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.modal-input {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  padding: 10px 14px;
+  font-size: 1rem;
+}
+.modal-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.25);
+}
+
+/* ===== Кнопка закрытия модалки (если нужна) ===== */
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Стилизация скроллбара для области чата */
+.chat-container::-webkit-scrollbar {
+  width: 8px;
+}
+.chat-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.chat-container::-webkit-scrollbar-thumb {
+  background: rgba(108, 99, 255, 0.5);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.chat-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 99, 255, 0.8);
+}
+
+/* Для светлой темы */
+[data-bs-theme="light"] .chat-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+[data-bs-theme="light"] .chat-container::-webkit-scrollbar-thumb {
+  background: rgba(108, 99, 255, 0.4);
+}
+[data-bs-theme="light"] .chat-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 99, 255, 0.7);
+}
+
+/* Панель информации о локации */
+.location-info {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-right: 16px;
+  width: 200px;
+  flex-shrink: 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.location-label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.location-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.location-info {
+  align-self: flex-start; /* не растягиваться на всю высоту */
+  max-height: 70vh;
+  overflow-y: auto;       /* если описание длинное – будет прокрутка */
+}
+
+.location-description {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.4;
+}

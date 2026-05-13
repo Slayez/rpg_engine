@@ -1,0 +1,205 @@
+/* ===== Тематические анимации для категорий навыков ===== */
+
+/* ---------- Базовый hover, если нет data-category ---------- */
+.skill-card:not([data-category]):hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+/* ---------- Магия огня ---------- */
+@keyframes firePulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(226,88,34,0.5); }
+  50% { box-shadow: 0 0 20px rgba(255,140,0,0.8), 0 0 40px rgba(255,69,0,0.5); }
+}
+.skill-card[data-category="Магия огня"]:hover {
+  animation: firePulse 0.8s infinite alternate;
+  border-color: #ff4500;
+}
+.skill-card[data-category="Магия огня"]:hover::before {
+  content: '';
+  position: absolute;
+  top: -10px; left: -10px; right: -10px; bottom: -10px;
+  background: radial-gradient(circle at 50% 0%, rgba(255,100,0,0.3), transparent 70%);
+  z-index: -1;
+}
+
+/* ---------- Магия воды ---------- */
+@keyframes waterWave {
+  0%, 100% { box-shadow: 0 0 5px rgba(74,144,217,0.5); }
+  50% { box-shadow: 0 0 15px rgba(0,191,255,0.7), inset 0 0 20px rgba(0,191,255,0.2); }
+}
+.skill-card[data-category="Магия воды"]:hover {
+  animation: waterWave 1s infinite alternate;
+  border-color: #00bfff;
+  background: linear-gradient(135deg, rgba(0,191,255,0.15) 0%, rgba(0,50,100,0.05) 100%);
+}
+
+/* ---------- Магия земли ---------- */
+@keyframes earthRumble {
+  0%, 100% { transform: translateY(0); box-shadow: 0 0 5px rgba(139,69,19,0.5); }
+  10% { transform: translateY(-2px); }
+  20% { transform: translateY(2px); }
+  30% { transform: translateY(-1px); }
+  40% { transform: translateY(1px); }
+  50% { box-shadow: 0 0 20px rgba(139,69,19,0.8); }
+}
+.skill-card[data-category="Магия земли"]:hover {
+  animation: earthRumble 0.8s ease-in-out both;
+  border-color: #8b4513;
+  background: linear-gradient(135deg, rgba(139,69,19,0.2) 0%, rgba(85,55,20,0.1) 100%);
+}
+
+/* ---------- Магия воздуха ---------- */
+@keyframes windGust {
+  0%, 100% { box-shadow: 0 0 5px rgba(160,200,220,0.5); }
+  25% { transform: rotate(0.5deg); }
+  75% { transform: rotate(-0.5deg); }
+  50% { box-shadow: 0 0 15px rgba(200,230,255,0.8); }
+}
+.skill-card[data-category="Магия воздуха"]:hover {
+  animation: windGust 0.6s infinite ease-in-out;
+  border-color: #b0e0e6;
+  background: linear-gradient(135deg, rgba(200,230,255,0.2) 0%, rgba(220,240,255,0.05) 100%);
+}
+
+/* ---------- Магия пространства ---------- */
+@keyframes portalShift {
+  0%, 100% { filter: blur(0px); box-shadow: 0 0 5px rgba(160,32,240,0.5); }
+  50% { filter: blur(0.8px); box-shadow: 0 0 20px rgba(160,32,240,0.9); }
+}
+.skill-card[data-category="Магия пространства"]:hover {
+  animation: portalShift 1.2s infinite alternate;
+  border-color: #a020f0;
+  background: linear-gradient(135deg, rgba(160,32,240,0.25) 0%, rgba(0,0,0,0.1) 100%);
+}
+
+/* ---------- Универсальная магия ---------- */
+@keyframes rainbowGlow {
+  0% { box-shadow: 0 0 5px #ff0000; border-color: #ff0000; }
+  16% { box-shadow: 0 0 15px #ff8800; border-color: #ff8800; }
+  33% { box-shadow: 0 0 15px #ffff00; border-color: #ffff00; }
+  50% { box-shadow: 0 0 15px #00ff00; border-color: #00ff00; }
+  66% { box-shadow: 0 0 15px #0088ff; border-color: #0088ff; }
+  83% { box-shadow: 0 0 15px #8800ff; border-color: #8800ff; }
+  100% { box-shadow: 0 0 5px #ff00ff; border-color: #ff00ff; }
+}
+.skill-card[data-category="Универсальная магия"]:hover {
+  animation: rainbowGlow 2s linear infinite;
+  background: linear-gradient(135deg, rgba(200,200,200,0.15) 0%, rgba(255,255,255,0.05) 100%);
+}
+
+/* ---------- Дальний бой ---------- */
+@keyframes arrowZoom {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 5px rgba(180,180,180,0.5); }
+  50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(200,200,200,0.8); }
+}
+.skill-card[data-category="Дальний бой"]:hover {
+  animation: arrowZoom 0.7s ease-in-out both;
+  border-color: #c0c0c0;
+  background: linear-gradient(135deg, rgba(192,192,192,0.15) 0%, rgba(230,230,230,0.05) 100%);
+}
+
+/* ---------- Ближний бой ---------- */
+@keyframes bladeFlash {
+  0%, 100% { box-shadow: 0 0 5px rgba(255,215,0,0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 25px rgba(255,215,0,0.9), 0 0 50px rgba(255,255,0,0.5); transform: scale(1.02); }
+}
+.skill-card[data-category="Ближний бой"]:hover {
+  animation: bladeFlash 0.6s infinite alternate;
+  border-color: #ffd700;
+  background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,200,0,0.05) 100%);
+}
+
+/* ---------- Призыв ---------- */
+@keyframes summonRitual {
+  0%, 100% { box-shadow: 0 0 5px rgba(75,0,130,0.5); }
+  50% { box-shadow: 0 0 20px rgba(138,43,226,0.8), 0 0 30px rgba(75,0,130,0.6); }
+  30%, 70% { filter: brightness(1.2); }
+}
+.skill-card[data-category="Призыв"]:hover {
+  animation: summonRitual 1s infinite alternate;
+  border-color: #8a2be2;
+  background: linear-gradient(135deg, rgba(138,43,226,0.2) 0%, rgba(75,0,130,0.1) 100%);
+}
+
+/* ---------- Защита ---------- */
+@keyframes shieldBash {
+  0%, 100% { box-shadow: 0 0 5px rgba(50,205,50,0.4); }
+  30% { box-shadow: inset 0 0 15px rgba(50,205,50,0.4), 0 0 15px rgba(50,205,50,0.6); }
+}
+.skill-card[data-category="Защита"]:hover {
+  animation: shieldBash 1.5s infinite alternate;
+  border-color: #32cd32;
+  background: linear-gradient(135deg, rgba(50,205,50,0.15) 0%, rgba(0,100,0,0.1) 100%);
+}
+
+/* ---------- Скрытность ---------- */
+@keyframes shadowFade {
+  0%, 100% { opacity: 1; box-shadow: 0 0 5px rgba(20,20,20,0.7); }
+  50% { opacity: 0.85; box-shadow: 0 0 20px rgba(0,0,0,0.9); }
+}
+.skill-card[data-category="Скрытность"]:hover {
+  animation: shadowFade 1s infinite alternate;
+  border-color: #2f4f4f;
+  background: linear-gradient(135deg, rgba(47,79,79,0.3) 0%, rgba(0,0,0,0.2) 100%);
+}
+
+/* ---------- Исцеление ---------- */
+@keyframes healGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(46,204,113,0.5); }
+  50% { box-shadow: 0 0 25px rgba(46,204,113,0.9), 0 0 40px rgba(46,204,113,0.4); }
+  25%, 75% { filter: brightness(1.15); }
+}
+.skill-card[data-category="Исцеление"]:hover {
+  animation: healGlow 1.2s infinite alternate;
+  border-color: #2ecc71;
+  background: linear-gradient(135deg, rgba(46,204,113,0.2) 0%, rgba(0,100,0,0.1) 100%);
+}
+
+/* ---------- Бытовая магия ---------- */
+@keyframes natureGrowth {
+  0%, 100% { box-shadow: 0 0 5px rgba(34,139,34,0.4); }
+  50% { box-shadow: 0 0 20px rgba(34,139,34,0.8), 0 0 30px rgba(124,252,0,0.5); }
+}
+.skill-card[data-category="Бытовая магия"]:hover {
+  animation: natureGrowth 0.9s infinite alternate;
+  border-color: #228b22;
+  background: linear-gradient(135deg, rgba(34,139,34,0.2) 0%, rgba(85,107,47,0.1) 100%);
+}
+
+/* ---------- Знания ---------- */
+@keyframes runeGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(210,180,140,0.5); }
+  50% { box-shadow: 0 0 20px rgba(255,215,0,0.7); }
+}
+.skill-card[data-category="Знания"]:hover {
+  animation: runeGlow 1s infinite alternate;
+  border-color: #daa520;
+  background: linear-gradient(135deg, rgba(218,165,32,0.15) 0%, rgba(139,119,50,0.1) 100%);
+}
+
+/* ---------- Ловкость ---------- */
+@keyframes agileDash {
+  0% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  100% { transform: translateX(-2px); }
+}
+.skill-card[data-category="Ловкость"]:hover {
+  animation: agileDash 0.3s ease-in-out both;
+  border-color: #ff69b4;
+  background: linear-gradient(135deg, rgba(255,105,180,0.15) 0%, rgba(255,20,147,0.05) 100%);
+}
+
+/* ---------- Сила ---------- */
+@keyframes strengthRumble {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 5px rgba(255,69,0,0.6); }
+  30% { transform: scale(1.05); }
+  60% { transform: scale(1.03); }
+  50% { box-shadow: 0 0 25px rgba(255,69,0,0.9), 0 0 50px rgba(255,0,0,0.5); }
+}
+.skill-card[data-category="Сила"]:hover {
+  animation: strengthRumble 0.8s infinite alternate;
+  border-color: #ff4500;
+  background: linear-gradient(135deg, rgba(255,69,0,0.2) 0%, rgba(200,0,0,0.1) 100%);
+}

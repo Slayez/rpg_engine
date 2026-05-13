@@ -1,0 +1,51 @@
+/* ---------- Панель персонажа ---------- */
+.char-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.char-header h5 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.resources {
+  margin-bottom: 16px;
+}
+.resources > div {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.05);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.equip-item, .inventory-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.equip-item strong, .inventory-item-row span:first-child {
+  margin-right: 12px;
+}
+.item-desc {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: right;
+  max-width: 60%;
+}

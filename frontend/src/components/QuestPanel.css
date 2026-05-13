@@ -1,0 +1,23 @@
+/* ---------- Карточка задания ---------- */
+.quest-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.quest-card h6 {
+  margin-top: 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.quest-card ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+.quest-card .badge {
+  margin-top: 8px;
+}
