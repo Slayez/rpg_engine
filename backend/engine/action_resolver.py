@@ -267,15 +267,32 @@ class ActionExecutor:
                 memory_entries.append(f"Навык {skill['name']} нанёс {dmg} урона по {target_name}")
                 system_msg = f"✨ {skill['name']} → 🌳 {target_name.capitalize()} получило {dmg} урона"
 
-        if not system_msg:
-            system_msg = f"✨ {skill['name']} применён"
+        # Определяем реакцию врага
+        enemy_reaction = None
+        if target_enemy:
+            if new_health <= 0:
+                enemy_reaction = "defeated"
+            elif dmg >= target_enemy.get("max_health", 25) * 0.3:
+                enemy_reaction = "staggered"
+            else:
+                enemy_reaction = "normal"
+
+        # Формируем combat_feedback
+        combat_feedback = {
+            "damage_dealt": narrator_context.get("damage_dealt", 0),
+            "damage_type": narrator_context.get("damage_type", "none"),
+            "mp_spent": cost_mp,
+            "enemy_reaction": enemy_reaction,
+            "target_name": target_name
+        }
 
         return {
             "allowed": True,
             "updates": updates,
             "memory": memory_entries,
             "narrator_context": narrator_context,
-            "system_message": system_msg
+            "system_message": system_msg,
+            "combat_feedback": combat_feedback
         }
     
     def _handle_attack(self, intent: dict) -> dict:
@@ -323,7 +340,30 @@ class ActionExecutor:
             memory.append(f"Атака {weapon['name']} нанесла {dmg_roll} урона по {target_name}")
             sys_msg = f"⚔️ {weapon['name']} → 🌳 {target_name.capitalize()} получило {dmg_roll} урона"
 
-        return {"allowed": True, "updates": updates, "memory": memory, "narrator_context": ctx, "system_message": sys_msg}
+        # Определяем реакцию врага для атаки
+        enemy_reaction = None
+        if target_enemy and 'new_hp' in locals():
+            if new_hp <= 0:
+                enemy_reaction = "defeated"
+            elif dmg_roll >= target_enemy.get("max_health", 25) * 0.3:
+                enemy_reaction = "staggered"
+            else:
+                enemy_reaction = "normal"
+
+        return {
+            "allowed": True, 
+            "updates": updates, 
+            "memory": memory, 
+            "narrator_context": ctx, 
+            "system_message": sys_msg,
+            "combat_feedback": {
+                "damage_dealt": dmg_roll,
+                "damage_type": "physical",
+                "mp_spent": 0,
+                "enemy_reaction": enemy_reaction,
+                "target_name": target_name
+            }
+        }
     
     def _handle_interact(self, intent: dict) -> dict:
         obj_name = intent.get("object", "").strip()

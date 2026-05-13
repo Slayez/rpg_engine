@@ -235,7 +235,8 @@ class WorldState:
                 "defense": None,
                 "stat_bonuses": None,
                 "weight": 2.0,
-                "stack_size": 1
+                "stack_size": 1,
+                "icon": "⚔️"
             }
         ]
         return {

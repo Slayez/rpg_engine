@@ -15,6 +15,26 @@ function CharacterPanel({ worldState }) {
   const equipped = inventory.filter(item => item.equipped);
   const unequipped = inventory.filter(item => !item.equipped);
 
+  // Функция для получения иконки по типу предмета
+  const getIconByType = (type) => {
+    const icons = {
+      weapon: "⚔️",
+      armor: "🛡️",
+      helmet: "🪖",
+      chest: "👕",
+      legs: "👖",
+      boots: "👢",
+      gloves: "🧤",
+      shield: "🛡️",
+      potion: "🧪",
+      ring: "💍",
+      amulet: "📿",
+      accessory: "💎",
+      misc: "📦"
+    };
+    return icons[type] || "📦";
+  };
+
   // Бонусы только от экипировки
   const bonuses = equipped.reduce((acc, item) => {
     if (item.stat_bonuses) {
@@ -78,7 +98,7 @@ function CharacterPanel({ worldState }) {
           <h6>Экипировка</h6>
           {equipped.map((item,i) => (
             <div key={i} className="equip-item">
-              <strong>{item.type==='weapon'?'⚔️':item.type==='armor'?'🛡️':'💠'} {item.name}</strong>
+              <strong>{item.icon || getIconByType(item.type)} {item.name}</strong>
               <span className="item-desc">{item.description}</span>
             </div>
           ))}
@@ -89,7 +109,7 @@ function CharacterPanel({ worldState }) {
           <h6>Инвентарь</h6>
           {unequipped.map((item,i) => (
             <div key={i} className="inventory-item-row">
-              <span>📦 {item.name}</span>
+              <span>{item.icon || getIconByType(item.type)} {item.name}</span>
               <span className="item-desc">{item.description}</span>
             </div>
           ))}

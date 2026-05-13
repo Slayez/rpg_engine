@@ -5,6 +5,24 @@ import remarkBreaks from 'remark-breaks';
 import rehypeRaw from 'rehype-raw';
 import { highlightMechanics } from '../utils/formatting';
 
+// Иконки для типов системных сообщений
+const SYSTEM_MESSAGE_ICONS = {
+  'enemy-damage': '⚔️',
+  'mp-spent': '💙',
+  'enemy-reaction': '🐺',
+  'enemy-defeated': '💀',
+  'skill-use': '✨',
+  'hp-heal': '❤️',
+  'hp-damage': '💔',
+  'mp-heal': '💎',
+  'exp-gain': '✨',
+  'level-up': '⭐',
+  'item-appear': '🆕',
+  'item-removed': '❌',
+  'enemy-action': '🐺',
+  'enemy-attack': '🐺'
+};
+
 function ChatWindow({ messages, onDeleteMessage, onEditMessage, onRetryMessage, isStreaming, editStartIndex = 0 }) {
   const bottomRef = useRef(null);
   const [hoverId, setHoverId] = useState(null);
@@ -18,10 +36,12 @@ function ChatWindow({ messages, onDeleteMessage, onEditMessage, onRetryMessage, 
       {messages.map((msg, idx) => {
         const canEdit = idx >= editStartIndex && msg.sender !== 'system';
         if (msg.sender === 'system') {
+          const icon = SYSTEM_MESSAGE_ICONS[msg.type] || 'ℹ️';
           const animClass = msg.type || 'fadeInUp';
           return (
             <div key={idx} className={`system-message ${animClass}`}>
-              {msg.text}
+              <span className="system-message-icon">{icon}</span>
+              <span className="system-message-text">{msg.text}</span>
             </div>
           );
         }
