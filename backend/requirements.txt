@@ -7,3 +7,8 @@ python-dotenv==1.0.1
 json-repair==0.17.0
 torch==2.5.1
 transformers==4.38.1
+sqlalchemy==2.0.25
+tenacity==8.2.3
+react-window==1.8.10
+zustand==0.3.0
+react-hot-toast==2.4.1
