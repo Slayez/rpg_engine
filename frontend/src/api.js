@@ -146,3 +146,87 @@ export const chooseStartSkills = async (slotId, skills) => {
   if (!res.ok) throw new Error('Ошибка выбора навыков');
   return res.json();
 };
+
+// ========== API для интерактивной сцены ==========
+
+export const getScene = async (slotId) => {
+  const res = await fetch(`/scene?slot_id=${slotId}`);
+  if (!res.ok) throw new Error('Ошибка загрузки сцены');
+  return res.json();
+};
+
+export const movePlayer = async (slotId, x, y) => {
+  const res = await fetch('/scene/move', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId, x, y })
+  });
+  if (!res.ok) throw new Error('Ошибка перемещения');
+  return res.json();
+};
+
+export const interactWithObject = async (slotId, objectId, action) => {
+  const res = await fetch('/scene/interact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId, object_id: objectId, action })
+  });
+  if (!res.ok) throw new Error('Ошибка взаимодействия');
+  return res.json();
+};
+
+// ========== API для тактического боя ==========\n\nexport const startTacticalCombat = async (slotId, units) => {
+  const res = await fetch('/combat/tactical/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId, units })
+  });
+  if (!res.ok) throw new Error('Ошибка начала боя');
+  return res.json();
+};
+
+export const tacticalMove = async (slotId, unitId, x, y) => {
+  const res = await fetch('/combat/tactical/move', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId, unit_id: unitId, x, y })
+  });
+  if (!res.ok) throw new Error('Ошибка перемещения');
+  return res.json();
+};
+
+export const tacticalAttack = async (slotId, attackerId, targetId) => {
+  const res = await fetch('/combat/tactical/attack', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId, attacker_id: attackerId, target_id: targetId })
+  });
+  if (!res.ok) throw new Error('Ошибка атаки');
+  return res.json();
+};
+
+export const tacticalSkill = async (slotId, unitId, skillName, targetX, targetY) => {
+  const res = await fetch('/combat/tactical/skill', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      slot_id: slotId, 
+      unit_id: unitId, 
+      skill_name: skillName,
+      target_x: targetX,
+      target_y: targetY
+    })
+  });
+  if (!res.ok) throw new Error('Ошибка использования навыка');
+  return res.json();
+};
+
+export const endTurn = async (slotId) => {
+  const res = await fetch('/combat/tactical/end-turn', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId })
+  });
+  if (!res.ok) throw new Error('Ошибка завершения хода');
+  return res.json();
+};
