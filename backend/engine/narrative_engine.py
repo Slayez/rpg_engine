@@ -131,6 +131,11 @@ class NarrativeEngine:
                 combined["narrator_contexts"].append(result["narrator_context"])
             if "system_message" in result:
                 combined["system_messages"].append(result["system_message"])
+            # Собираем combat_feedback от каждого интента
+            if "combat_feedback" in result:
+                if "combat_feedback_list" not in combined:
+                    combined["combat_feedback_list"] = []
+                combined["combat_feedback_list"].append(result["combat_feedback"])
         
         result = combined
         self._save_checkpoint()
@@ -163,10 +168,26 @@ class NarrativeEngine:
         self.world.reduce_cooldowns()
         self.world.enforce_resource_limits()
 
+        # Собираем combat_feedback из всех интентов
+        combat_feedback_list = result.get("combat_feedback_list", [])
+        
         skill_msgs_str = result.get("system_messages", [])
         skill_msgs = [{"text": msg, "type": "skill_use"} for msg in skill_msgs_str]
+        
+        # Добавляем сообщения о боевом фидбеке
+        fb_msgs = []
+        for fb in combat_feedback_list:
+            if fb.get("damage_dealt") and fb.get("damage_dealt") > 0:
+                fb_msgs.append({"text": f"⚔️ Нанесено {fb['damage_dealt']} урона", "type": "enemy-damage"})
+            if fb.get("mp_spent") and fb.get("mp_spent") > 0:
+                fb_msgs.append({"text": f"💙 -{fb['mp_spent']} MP", "type": "mp-spent"})
+            if fb.get("enemy_reaction") == "staggered":
+                fb_msgs.append({"text": f"🐺 {fb.get('target_name', 'Враг')} отшатнулся!", "type": "enemy-reaction"})
+            elif fb.get("enemy_reaction") == "defeated":
+                fb_msgs.append({"text": f"💀 {fb.get('target_name', 'Враг')} повержен!", "type": "enemy-defeated"})
+        
         env_msgs = []
-        system_messages = self._build_system_messages(old_state, self.world.state, env_msgs, skill_msgs)
+        system_messages = self._build_system_messages(old_state, self.world.state, env_msgs, skill_msgs + fb_msgs)
 
         # Генерируем нарратив
         narration = await self.narrator.generate_from_result(player_action, result.get("narrator_contexts", []))
@@ -175,6 +196,25 @@ class NarrativeEngine:
         for sm in system_messages:
             self.add_to_history("system", sm["text"])
         self.add_to_history("assistant", narration)
+        
+        # Обработка хода врагов (ИИ-реакция)
+        enemy_actions = await self._process_enemy_turn()
+        if enemy_actions:
+            for action in enemy_actions:
+                enemy_msg = {"text": action["description"], "type": "enemy-action"}
+                system_messages.append(enemy_msg)
+                self.add_to_history("system", action["description"])
+                
+                # Применяем эффекты действий врагов
+                if action.get("damage_to_player"):
+                    current_hp = self.world.get("characters.player.health", 100)
+                    new_hp = max(0, current_hp - action["damage_to_player"])
+                    self.world.update("characters.player.health", new_hp)
+                    system_messages.append({
+                        "text": f"💔 Вы получили {action['damage_to_player']} урона",
+                        "type": "hp-damage"
+                    })
+        
         self._save_chat_history()
 
         # Стриминг нарратива
@@ -182,10 +222,11 @@ class NarrativeEngine:
             yield f"data: {json.dumps({'type':'text','content':narration[i:i+50]})}\n\n"
             await asyncio.sleep(0.01)
 
-        # Отправляем системные сообщения
+        # Отправляем системные сообщения (включая действия врагов)
         for sm in system_messages:
             yield f"data: {json.dumps({'type':'system_message','text':sm['text'],'msg_type':sm['type']})}\n\n"
 
+        # Обновляем world_state после действий врагов
         final = json.dumps({
             "type": "done",
             "narration": narration,
@@ -242,6 +283,11 @@ class NarrativeEngine:
                 combined["narrator_contexts"].append(result["narrator_context"])
             if "system_message" in result:
                 combined["system_messages"].append(result["system_message"])
+            # Собираем combat_feedback от каждого интента
+            if "combat_feedback" in result:
+                if "combat_feedback_list" not in combined:
+                    combined["combat_feedback_list"] = []
+                combined["combat_feedback_list"].append(result["combat_feedback"])
         
         result = combined
         self._save_checkpoint()
@@ -305,3 +351,75 @@ class NarrativeEngine:
             raise ValueError("Нечего редактировать")
         self.undo_last_action()
         return await self.process_action(new_action)
+
+    async def _process_enemy_turn(self):
+        """Генерация ответа врагов через простые правила + LLM."""
+        enemies = self.world.get("enemies", [])
+        if not enemies:
+            return []
+        
+        player_stats = self.world.get("characters.player.stats", {})
+        player_hp = self.world.get("characters.player.health", 100)
+        location = self.world.get("location", "Неизвестно")
+        
+        actions = []
+        for enemy in enemies:
+            if enemy.get("health", 0) <= 0:
+                continue
+            
+            enemy_hp = enemy.get("health", 25)
+            enemy_max_hp = enemy.get("max_health", 25)
+            hp_percent = enemy_hp / enemy_max_hp if enemy_max_hp > 0 else 1
+            
+            # Простые правила ИИ
+            action = None
+            if hp_percent < 0.3:
+                # Враг ранен - может отступить или атаковать в отчаянии
+                import random
+                if random.random() < 0.5:
+                    action = {
+                        "enemy_id": enemy.get("id"),
+                        "action": "flee",
+                        "description": f"🐺 {enemy['name']} отступает с поджатым хвостом!",
+                        "damage_to_player": 0
+                    }
+                else:
+                    dmg = enemy.get("damage", 5)
+                    action = {
+                        "enemy_id": enemy.get("id"),
+                        "action": "attack_desperate",
+                        "description": f"🐺 {enemy['name']} в отчаянии контратакует и наносит {dmg} урона!",
+                        "damage_to_player": dmg
+                    }
+            elif hp_percent < 0.6:
+                # Враг ранен - атакует
+                dmg = enemy.get("damage", 5)
+                action = {
+                    "enemy_id": enemy.get("id"),
+                    "action": "attack",
+                    "description": f"🐺 {enemy['name']} рычит и атакует, нанося {dmg} урона!",
+                    "damage_to_player": dmg
+                }
+            else:
+                # Враг здоров - может атаковать или занять позицию
+                import random
+                if random.random() < 0.7:
+                    dmg = enemy.get("damage", 5)
+                    action = {
+                        "enemy_id": enemy.get("id"),
+                        "action": "attack",
+                        "description": f"🐺 {enemy['name']} нападает и наносит {dmg} урона!",
+                        "damage_to_player": dmg
+                    }
+                else:
+                    action = {
+                        "enemy_id": enemy.get("id"),
+                        "action": "taunt",
+                        "description": f"🐺 {enemy['name']} угрожающе рычит, готовясь к бою!",
+                        "damage_to_player": 0
+                    }
+            
+            if action:
+                actions.append(action)
+        
+        return actions

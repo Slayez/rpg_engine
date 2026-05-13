@@ -408,3 +408,10 @@ body {
   font-style: italic;
   line-height: 1.4;
 }
+
+/* Адаптивность для визуального режима */
+@media (max-width: 1024px) {
+  .visual-mode-layout {
+    flex-direction: column !important;
+  }
+}

@@ -151,35 +151,41 @@ function GameScreen({ slotId, onBack }) {
       {activeTab === 'chat' && (
         <div className={`chat-panel-wrapper ${chatBorderAnim}`}>
           {visualMode && sceneData ? (
-            // Визуальный режим с интерактивной сценой
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <InteractiveScene
-                scene={sceneData}
-                onObjectClick={handleSceneObjectClick}
-                onObjectRightClick={handleSceneRightClick}
-                onMove={handleSceneMove}
-                showGrid={false}
-              />
-              <div className="card-panel" style={{ flex: 1, height: '40vh', display: 'flex', flexDirection: 'column' }}>
-                <div className="chat-container" style={{ flex: 1 }}>
-                  <ChatComponent
-                    messages={displayMessages.slice(-20)}
-                    onDeleteMessage={() => handleUndo()}
-                    onEditMessage={openEditModal}
-                    onRetryMessage={handleRetry}
-                    isStreaming={streaming}
-                    editStartIndex={initialHistoryLen}
+            // Визуальный режим с интерактивной сценой - карта слева, чат справа
+            <div className="visual-mode-layout" style={{ display: 'flex', gap: '16px', flexDirection: 'row' }}>
+              {/* Карта слева - 65% ширины */}
+              <div style={{ flex: '0 0 65%', minWidth: 0 }}>
+                <InteractiveScene
+                  scene={sceneData}
+                  onObjectClick={handleSceneObjectClick}
+                  onObjectRightClick={handleSceneRightClick}
+                  onMove={handleSceneMove}
+                  showGrid={false}
+                />
+              </div>
+              {/* Чат справа - 35% ширины */}
+              <div style={{ flex: '0 0 35%', display: 'flex', flexDirection: 'column', height: '70vh' }}>
+                <div className="card-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div className="chat-container" style={{ flex: 1, overflowY: 'auto' }}>
+                    <ChatComponent
+                      messages={displayMessages.slice(-20)}
+                      onDeleteMessage={() => handleUndo()}
+                      onEditMessage={openEditModal}
+                      onRetryMessage={handleRetry}
+                      isStreaming={streaming}
+                      editStartIndex={initialHistoryLen}
+                    />
+                  </div>
+                  <InputBox
+                    text={inputText}
+                    onTextChange={setInputText}
+                    history={inputHistory}
+                    historyIndex={inputHistoryIndex}
+                    onHistoryIndexChange={setInputHistoryIndex}
+                    onSend={handleSend}
+                    disabled={streaming}
                   />
                 </div>
-                <InputBox
-                  text={inputText}
-                  onTextChange={setInputText}
-                  history={inputHistory}
-                  historyIndex={inputHistoryIndex}
-                  onHistoryIndexChange={setInputHistoryIndex}
-                  onSend={handleSend}
-                  disabled={streaming}
-                />
               </div>
             </div>
           ) : (
