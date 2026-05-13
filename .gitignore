@@ -1,35 +1,31 @@
-# Python
+```gitignore
+# Python cache
 __pycache__/
-*.py[cod]
+*.pyc
 *.pyo
-*.egg-info/
-dist/
-venv/
-.venv/
-env/
+*.pyd
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
 
 # Environment
 .env
+.env.local
+.env.*
 
-# ChromaDB persistent storage
-chroma_db/
-
-# World state save (game progress)
-world_state.json
-
-# Node.js / React
-frontend/node_modules/
-frontend/build/
-
-# IDE
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS generated
-.DS_Store
-Thumbs.db
+# Dependencies
+.venv/
+venv/
+node_modules/
 
-# Combined output (dev tool)
-combined_output.txt
+# Build artifacts
+dist/
+build/
+target/
+```
