@@ -1,39 +1,86 @@
-```
+```gitignore
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Logs and temp files
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
 *.log
-*.tmp
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.swp
+.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+
+# Python
+__pycache__/
+backend/__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+venv/
+.venv/
+env/
+
+# Environment
+.env
+
+# ChromaDB persistent storage
+chroma_db/
+
+# World state save (game progress)
+world_state.json
+
+# Node.js / React
+frontend/node_modules/
+frontend/build/
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Dependencies
-.venv/
-venv/
-node_modules/
+# OS generated
+.DS_Store
+Thumbs.db
 
-# Build artifacts
-dist/
-build/
-target/
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
-
-# Testing
-.pytest_cache/
-.mypy_cache/
+# Combined output (dev tool)
+combined_output.txt
 ```
