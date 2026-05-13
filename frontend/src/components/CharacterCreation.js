@@ -7,7 +7,7 @@ import SkillDescription from './SkillDescription';
 import './CharacterCreation.css';
 
 // Получаем количество навыков из API (должно совпадать с backend config)
-const MAX_START_SKILLS = 3;
+const MAX_START_SKILLS = 5;
 
 const CATEGORY_ICONS = {
   "Магия огня": "🔥",

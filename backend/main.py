@@ -45,12 +45,25 @@ async def generate_start_skills(req: GenerateSkillsRequest):
     skills = await manager.generate_start_skills(req.name, req.race_id)
     return {"skills": skills}
 
+# backend/main.py (замените существующий роут choose_start_skills)
+
+from typing import Dict, Any
+
 @app.post("/choose-start-skills", response_model=dict)
-def choose_start_skills(req: ChooseSkillsRequest):
-    # Валидация количества выбранных навыков
-    if len(req.skills) != config.START_SKILLS_CHOICE_COUNT:
-        raise HTTPException(400, f"Необходимо выбрать ровно {config.START_SKILLS_CHOICE_COUNT} навыков")
-    manager.choose_start_skills(req.slot_id, [s.model_dump() for s in req.skills])
+def choose_start_skills(req: Dict[str, Any]):
+    skills = req.get("skills", [])
+    slot_id = req.get("slot_id")
+    
+    if not slot_id:
+        raise HTTPException(400, "slot_id обязателен")
+        
+    expected_count = config.START_SKILLS_CHOICE_COUNT
+    if len(skills) != expected_count:
+        logger.warning(f"Неверное количество навыков: ожидалось {expected_count}, получено {len(skills)}")
+        raise HTTPException(400, f"Необходимо выбрать ровно {expected_count} навыков (получено: {len(skills)})")
+        
+    # Передаём навыки напрямую как список dict, без model_dump()
+    manager.choose_start_skills(slot_id, skills)
     return {"status": "ok"}
 
 from fastapi.responses import StreamingResponse

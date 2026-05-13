@@ -1,3 +1,4 @@
+// frontend/src/api.js
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const RACES = [
@@ -52,42 +53,41 @@ export const sendActionStream = (slotId, action, onChunk, onDone, onError, onSys
     body: JSON.stringify({ slot_id: slotId, action }),
     signal: controller.signal
   })
-    .then(response => {
-      if (!response.ok) throw new Error('Ошибка сети');
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      const read = () => {
-        reader.read().then(({ done, value }) => {
-          if (done) return;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop();
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.type === 'text') {
-                  onChunk(data.content);
-                } else if (data.type === 'system_message') {
-                  if (onSystemMessage) onSystemMessage(data.text, data.msg_type);
-                } else if (data.type === 'done') {
-                  onDone(data);
-                  return;
-                } else if (data.type === 'error') {
-                  onError(data.message);
-                  return;
-                }
-              } catch (e) {}
-            }
+  .then(response => {
+    if (!response.ok) throw new Error('Ошибка сети');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    const read = () => {
+      reader.read().then(({ done, value }) => {
+        if (done) return;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'text') {
+                onChunk(data.content);
+              } else if (data.type === 'system_message') {
+                if (onSystemMessage) onSystemMessage(data.text, data.msg_type);
+              } else if (data.type === 'done') {
+                onDone(data);
+                return;
+              } else if (data.type === 'error') {
+                onError(data.message);
+                return;
+              }
+            } catch (e) {}
           }
-          read();
-        });
-      };
-      read();
-    })
-    .catch(err => onError(err.message));
+        }
+        read();
+      });
+    };
+    read();
+  })
+  .catch(err => onError(err.message));
   return controller;
 };
 
@@ -148,7 +148,6 @@ export const chooseStartSkills = async (slotId, skills) => {
 };
 
 // ========== API для интерактивной сцены ==========
-
 export const getScene = async (slotId) => {
   const res = await fetch(`/scene?slot_id=${slotId}`);
   if (!res.ok) throw new Error('Ошибка загрузки сцены');
@@ -175,7 +174,8 @@ export const interactWithObject = async (slotId, objectId, action) => {
   return res.json();
 };
 
-// ========== API для тактического боя ==========\n\nexport const startTacticalCombat = async (slotId, units) => {
+// ========== API для тактического боя ==========
+export const startTacticalCombat = async (slotId, units) => {
   const res = await fetch('/combat/tactical/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -209,9 +209,9 @@ export const tacticalSkill = async (slotId, unitId, skillName, targetX, targetY)
   const res = await fetch('/combat/tactical/skill', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      slot_id: slotId, 
-      unit_id: unitId, 
+    body: JSON.stringify({
+      slot_id: slotId,
+      unit_id: unitId,
       skill_name: skillName,
       target_x: targetX,
       target_y: targetY
