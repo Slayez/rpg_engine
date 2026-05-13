@@ -257,7 +257,8 @@ class WorldState:
                 }
             },
             "enemies": [
-                {"id": "wolf_1", "name": "Лесной волк", "health": 25, "max_health": 25, "damage": 6, "type": "beast"}
+                {"id": "wolf_1", "name": "Лесной волк", "health": 25, "max_health": 25, 
+                 "damage": 6, "type": "beast", "magic_resist": 0}
             ],
             "active_quests": [
                 {
