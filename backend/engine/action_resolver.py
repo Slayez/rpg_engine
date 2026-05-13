@@ -56,7 +56,7 @@ class IntentParser:
                     "wait_cooldown": wait_cooldown
                 }]
 
-        # Стандартный разбор через LLM
+        # Стандартный разбор через LLM с JSON mode (Structured Outputs)
         skills = self.world.get("characters.player.skills", [])
         skill_names = ", ".join([s["name"] for s in skills]) if skills else ""
         dynamic_prompt = INTENT_PROMPT + (f"\n\nДоступные навыки: {skill_names}" if skill_names else "")
@@ -64,15 +64,13 @@ class IntentParser:
             {"role": "system", "content": dynamic_prompt},
             {"role": "user", "content": player_action}
         ]
-        raw = await self.llm.completion(messages, max_tokens=256, temperature=0.0)
+        raw = await self.llm.completion(messages, max_tokens=256, temperature=0.0, json_mode=True)
         try:
-            start = raw.find('[')
-            end = raw.rfind(']')
-            if start != -1 and end != -1:
-                json_str = raw[start:end+1]
-                intents = json.loads(json_str)
-                if isinstance(intents, list):
-                    return intents
+            intents = json.loads(raw)
+            if isinstance(intents, list):
+                return intents
+            elif isinstance(intents, dict):
+                return [intents]
         except Exception:
             logger.error(f"Intent parse failed: {raw}")
         # Fallback: single object

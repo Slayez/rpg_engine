@@ -1,6 +1,6 @@
 # backend/world_state.py
 
-import os, json, copy
+import os, json, copy, time
 from typing import Any, Dict, List, Optional
 from config import SAVES_DIR
 from models import AVAILABLE_RACES
@@ -16,14 +16,30 @@ class WorldState:
         if loaded:
             loaded.setdefault("characters", {}).setdefault("player", {}).setdefault("cooldowns", {})
             loaded.setdefault("environment_objects", {})
+            # Инициализация веса и лимитов
+            player = loaded.get("characters", {}).get("player", {})
+            player.setdefault("carry_capacity", 50)  # Максимальный вес
+            for item in player.get("inventory", []):
+                item.setdefault("weight", 1.0)
+                item.setdefault("stack_size", 1)
             self.state = loaded
         elif initial_data:
             initial_data.setdefault("environment_objects", {})
+            player = initial_data.get("characters", {}).get("player", {})
+            if player:
+                player.setdefault("carry_capacity", 50)
+                for item in player.get("inventory", []):
+                    item.setdefault("weight", 1.0)
+                    item.setdefault("stack_size", 1)
             self.state = initial_data
             self._save()
         else:
             self.state = {}
             self._save()
+        
+        # Для системы тиков
+        self._last_tick = time.time()
+        self._tick_interval = 30  # секунд
 
     def _load(self) -> Optional[Dict]:
         if os.path.exists(self.save_file):
@@ -155,6 +171,34 @@ class WorldState:
         if player.get("mp", 0) > mp_max:
             self.update("characters.player.mp", mp_max)
 
+    def check_inventory_weight(self, item_name: str = None, item_weight: float = 0) -> tuple[bool, str]:
+        """Проверка лимита веса инвентаря. Возвращает (allowed, error_message)."""
+        player = self.state.get("characters", {}).get("player", {})
+        inventory = player.get("inventory", [])
+        carry_capacity = player.get("carry_capacity", 50)
+        
+        total_weight = sum(item.get("weight", 1.0) * item.get("stack_size", 1) for item in inventory)
+        if item_weight > 0:
+            if total_weight + item_weight > carry_capacity:
+                return False, f"Перегруз! Вес: {total_weight:.1f}/{carry_capacity} кг"
+        return True, ""
+
+    def get_total_inventory_weight(self) -> float:
+        """Возвращает общий вес инвентаря."""
+        player = self.state.get("characters", {}).get("player", {})
+        inventory = player.get("inventory", [])
+        return sum(item.get("weight", 1.0) * item.get("stack_size", 1) for item in inventory)
+
+    def process_tick(self):
+        """Обработка пассивных эффектов по таймеру (тик каждые 30 сек)."""
+        now = time.time()
+        if now - self._last_tick >= self._tick_interval:
+            self.apply_passive_regen()
+            self.reduce_cooldowns()
+            self._last_tick = now
+            return True
+        return False
+
     @staticmethod
     def default_state(player_name: str, race_id: str) -> Dict:
         race = next((r for r in AVAILABLE_RACES if r.id == race_id), None)
@@ -189,7 +233,9 @@ class WorldState:
                 "equipped": True,
                 "damage": 6,
                 "defense": None,
-                "stat_bonuses": None
+                "stat_bonuses": None,
+                "weight": 2.0,
+                "stack_size": 1
             }
         ]
         return {
@@ -205,7 +251,8 @@ class WorldState:
                     "inventory": inventory,
                     "stats": stats,
                     "skills": [],
-                    "cooldowns": {}
+                    "cooldowns": {},
+                    "carry_capacity": 50
                 }
             },
             "enemies": [
@@ -226,3 +273,28 @@ class WorldState:
                 {"sender": "assistant", "text": "Добро пожаловать в Этерию. Вы находитесь в густом лесу. Утро. Что будете делать?"}
             ]
         }
+
+    def generate_dynamic_quests(self, llm_client) -> list:
+        """Генерация динамических квестов при входе в новую локацию."""
+        location = self.get("location", "Неизвестно")
+        prompt = f"""
+Ты — генератор квестов для RPG. Для локации "{location}" создай 1-2 коротких задания.
+Верни JSON массив объектов с полями: id, name, description, objectives (массив строк).
+Пример: [{{"id": "q_new", "name": "Сбор трав", "description": "Собери 5 лечебных трав", "objectives": ["Найти травы", "Принести алхимику"]}}]
+Только JSON, без пояснений.
+"""
+        import json
+        messages = [{"role": "system", "content": prompt}]
+        raw = llm_client.completion(messages, max_tokens=256, temperature=0.7, json_mode=True)
+        try:
+            quests = json.loads(raw)
+            if isinstance(quests, list):
+                current = self.get("active_quests", [])
+                for q in quests:
+                    if not any(x.get("id") == q.get("id") for x in current):
+                        current.append(q)
+                self.update("active_quests", current)
+                return quests
+        except Exception:
+            pass
+        return []
