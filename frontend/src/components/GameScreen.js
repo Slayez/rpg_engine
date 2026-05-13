@@ -5,6 +5,8 @@ import InputBox from './InputBox';
 import CharacterPanel from './CharacterPanel';
 import QuestPanel from './QuestPanel';
 import InteractiveScene from './InteractiveScene';
+import TacticalCombat from './TacticalCombat';
+import ActionRadialMenu, { RadialMenuTrigger } from './ActionRadialMenu';
 import { useGameState } from '../hooks/useGameState';
 import { useSystemMessages } from '../hooks/useSystemMessages';
 import { fetchMemory, getScene, movePlayer, interactWithObject } from '../api';
@@ -26,6 +28,18 @@ function GameScreen({ slotId, onBack }) {
   // Visual mode state
   const [visualMode, setVisualMode] = useState(false);
   const [sceneData, setSceneData] = useState(null);
+  
+  // Combat mode state
+  const [combatMode, setCombatMode] = useState(false);
+  const [combatUnits, setCombatUnits] = useState([]);
+  const [selectedUnitId, setSelectedUnitId] = useState(null);
+  const [currentTurnUnitId, setCurrentTurnUnitId] = useState(null);
+  const [combatTurn, setCombatTurn] = useState(1);
+  
+  // Radial menu state
+  const [radialMenuOpen, setRadialMenuOpen] = useState(false);
+  const [radialMenuPosition, setRadialMenuPosition] = useState({ x: 0, y: 0 });
+  const [radialMenuActions, setRadialMenuActions] = useState([]);
 
   // Включаем виртуализацию при 100+ сообщениях
   useEffect(() => {
@@ -72,9 +86,31 @@ function GameScreen({ slotId, onBack }) {
     }
   };
 
-  // Обработка правого клика (контекстное меню)
+  // Обработка правого клика (контекстное меню / радиальное меню)
   const handleSceneRightClick = (menuData) => {
-    console.log('Context menu:', menuData);
+    setRadialMenuPosition({ x: menuData.x, y: menuData.y });
+    
+    // Формируем действия на основе контекста
+    const actions = [
+      { id: 'attack', icon: '⚔️', label: 'Атака', color: '#e74c3c' },
+      { id: 'defend', icon: '🛡️', label: 'Защита', color: '#3498db' },
+      { id: 'skill', icon: '✨', label: 'Навык', color: '#9b59b6' },
+      { id: 'item', icon: '🎒', label: 'Предмет', color: '#f39c12' },
+      { id: 'move', icon: '🏃', label: 'Перемещение', color: '#2ecc71' }
+    ];
+    
+    setRadialMenuActions(actions);
+    setRadialMenuOpen(true);
+  };
+
+  // Обработка выбора действия в радиальном меню
+  const handleRadialMenuSelect = async (action) => {
+    console.log('Radial menu action selected:', action);
+    
+    // Отправка действия в игровой движок
+    const actionText = `Использовать ${action.label}`;
+    const sysMsgs = await streamAction(actionText);
+    if (sysMsgs) applyBorderAnimation(sysMsgs);
   };
 
   // Обработка перемещения игрока
@@ -146,11 +182,74 @@ function GameScreen({ slotId, onBack }) {
         >
           {visualMode ? '🎨 Визуальный' : '📝 Текст'}
         </button>
+        <button 
+          className={`btn-outline ${combatMode ? 'active' : ''}`}
+          onClick={() => setCombatMode(!combatMode)}
+          title="Переключить режим боя"
+          disabled={!visualMode}
+        >
+          ⚔️ Бой
+        </button>
       </div>
 
       {activeTab === 'chat' && (
         <div className={`chat-panel-wrapper ${chatBorderAnim}`}>
-          {visualMode && sceneData ? (
+          {/* Режим тактического боя */}
+          {combatMode ? (
+            <div className="combat-mode-layout" style={{ display: 'flex', gap: '16px', flexDirection: 'row' }}>
+              {/* Тактическая сетка боя слева - 65% ширины */}
+              <div style={{ flex: '0 0 65%', minWidth: 0 }}>
+                <TacticalCombat
+                  units={combatUnits}
+                  gridSize={10}
+                  cellSize={50}
+                  selectedUnitId={selectedUnitId}
+                  onUnitSelect={setSelectedUnitId}
+                  onMoveUnit={(unitId, newX, newY) => {
+                    console.log('Move unit:', unitId, newX, newY);
+                    // TODO: Отправить действие на сервер
+                  }}
+                  onAttack={(attackerId, targetId) => {
+                    console.log('Attack:', attackerId, targetId);
+                    streamAction(`Атаковать ${targetId}`);
+                  }}
+                  onSkillUse={(unitId, skill, targetX, targetY) => {
+                    console.log('Skill use:', unitId, skill, targetX, targetY);
+                    if (skill) {
+                      streamAction(`Использовать навык ${skill.name}`);
+                    }
+                  }}
+                  showGrid={true}
+                  turn={combatTurn}
+                  currentTurnUnitId={currentTurnUnitId}
+                />
+              </div>
+              {/* Чат справа - 35% ширины */}
+              <div style={{ flex: '0 0 35%', display: 'flex', flexDirection: 'column', height: '70vh' }}>
+                <div className="card-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div className="chat-container" style={{ flex: 1, overflowY: 'auto' }}>
+                    <ChatComponent
+                      messages={displayMessages.slice(-20)}
+                      onDeleteMessage={() => handleUndo()}
+                      onEditMessage={openEditModal}
+                      onRetryMessage={handleRetry}
+                      isStreaming={streaming}
+                      editStartIndex={initialHistoryLen}
+                    />
+                  </div>
+                  <InputBox
+                    text={inputText}
+                    onTextChange={setInputText}
+                    history={inputHistory}
+                    historyIndex={inputHistoryIndex}
+                    onHistoryIndexChange={setInputHistoryIndex}
+                    onSend={handleSend}
+                    disabled={streaming}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : visualMode && sceneData ? (
             // Визуальный режим с интерактивной сценой - карта слева, чат справа
             <div className="visual-mode-layout" style={{ display: 'flex', gap: '16px', flexDirection: 'row' }}>
               {/* Карта слева - 65% ширины */}
@@ -231,6 +330,15 @@ function GameScreen({ slotId, onBack }) {
           ))}
         </div>
       )}
+
+      {/* Радиальное меню действий */}
+      <ActionRadialMenu
+        actions={radialMenuActions}
+        onSelect={handleRadialMenuSelect}
+        isOpen={radialMenuOpen}
+        onClose={() => setRadialMenuOpen(false)}
+        position={radialMenuPosition}
+      />
 
       {editModal.show && (
         <div className="modal-overlay" onClick={()=>setEditModal({show:false})}>

@@ -1,4 +1,4 @@
-import uuid, os, time, logging
+import uuid, os, time, logging, asyncio
 from typing import Dict, List, Optional
 import chromadb
 from chromadb.config import Settings
@@ -57,9 +57,11 @@ class LongTermMemory:
         if not self.embedding_client:
             return None
         try:
-            response = self.embedding_client.embeddings.create(
+            # Асинхронный вызов через to_thread для неблокирующего выполнения
+            response = asyncio.run(asyncio.to_thread(
+                self.embedding_client.embeddings.create,
                 model=self.embedding_model, input=text
-            )
+            ))
             return response.data[0].embedding
         except Exception as e:
             logger.error(f"Embedding failed: {e}")
