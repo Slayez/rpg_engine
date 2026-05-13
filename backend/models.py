@@ -55,17 +55,17 @@ class PlayerStats(BaseModel):
 class Skill(BaseModel):
     name: str
     level: int = 1
-    description: str = ""               # краткое художественное описание
+    description: Optional[str] = ""               # краткое художественное описание
     category: Optional[str] = None
-    effect: str = ""                    # механика
+    effect: Optional[str] = ""                    # механика
     cost_mp: int = 0
     cast_time: float = 0.0
     cooldown: int = 0
-    range: str = "на себя"
-    duration: str = ""
-    damage: str = ""
-    damage_type: str = "none"
-    requirements: str = ""
+    range: Optional[str] = "на себя"
+    duration: Optional[str] = ""
+    damage: Optional[str] = ""
+    damage_type: Optional[str] = "none"
+    requirements: Optional[str] = ""
     passive: bool = False
 
 class InventoryItem(BaseModel):

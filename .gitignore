@@ -1,3 +1,33 @@
+```gitignore
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Dependencies
+.venv/
+venv/
+node_modules/
+
+# Build artifacts
+dist/
+build/
+target/
 # Python
 __pycache__/
 *.py[cod]
@@ -33,3 +63,7 @@ Thumbs.db
 
 # Combined output (dev tool)
 combined_output.txt
+
+
+```
+

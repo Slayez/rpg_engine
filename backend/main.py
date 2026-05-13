@@ -50,7 +50,7 @@ def choose_start_skills(req: ChooseSkillsRequest):
     # Валидация количества выбранных навыков
     if len(req.skills) != config.START_SKILLS_CHOICE_COUNT:
         raise HTTPException(400, f"Необходимо выбрать ровно {config.START_SKILLS_CHOICE_COUNT} навыков")
-    manager.choose_start_skills(req.slot_id, [s.dict() for s in req.skills])
+    manager.choose_start_skills(req.slot_id, [s.model_dump() for s in req.skills])
     return {"status": "ok"}
 
 from fastapi.responses import StreamingResponse
