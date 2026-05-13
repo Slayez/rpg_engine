@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ChatWindow from './ChatWindow';
+import VirtualizedChatWindow from './VirtualizedChatWindow';
 import InputBox from './InputBox';
 import CharacterPanel from './CharacterPanel';
 import QuestPanel from './QuestPanel';
@@ -19,6 +20,16 @@ function GameScreen({ slotId, onBack }) {
   const [activeTab, setActiveTab] = useState('chat');
   const [memoryEntries, setMemoryEntries] = useState([]);
   const [editModal, setEditModal] = useState({ show: false, index: null, originalText: '' });
+  const [useVirtualization, setUseVirtualization] = useState(false);
+
+  // Включаем виртуализацию при 100+ сообщениях
+  useEffect(() => {
+    if (messages.length >= 100 && !useVirtualization) {
+      setUseVirtualization(true);
+    } else if (messages.length < 50 && useVirtualization) {
+      setUseVirtualization(false);
+    }
+  }, [messages.length]);
 
   // Состояние поля ввода (живёт здесь, не теряется при смене вкладки)
   const [inputText, setInputText] = useState('');
@@ -54,6 +65,8 @@ function GameScreen({ slotId, onBack }) {
   const displayMessages = [...messages];
   if (streaming && streamedText) displayMessages.push({ sender: 'assistant', text: streamedText + '▌' });
 
+  const ChatComponent = useVirtualization ? VirtualizedChatWindow : ChatWindow;
+
   return (
     <div className="app-container">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -72,7 +85,7 @@ function GameScreen({ slotId, onBack }) {
             <LocationInfo worldState={worldState} />
             <div className="card-panel" style={{ flex: 1, height: '70vh', display: 'flex', flexDirection: 'column' }}>
               <div className="chat-container">
-                <ChatWindow
+                <ChatComponent
                   messages={displayMessages}
                   onDeleteMessage={() => handleUndo()}
                   onEditMessage={openEditModal}
