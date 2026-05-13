@@ -1,75 +1,35 @@
-```
-# Compiled and build artifacts
-*.pyc
+# Python
 __pycache__/
-*.o
-*.obj
-*.so
-*.dll
-*.exe
-*.class
-*.out
-
-# Dependencies
-.venv/
-venv/
-node_modules/
+*.py[cod]
+*.pyo
+*.egg-info/
 dist/
-build/
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-*.bak
-*.~*
+venv/
+.venv/
+env/
 
 # Environment
 .env
-.env.local
-.env.*
 
-# Editors
+# ChromaDB persistent storage
+chroma_db/
+
+# World state save (game progress)
+world_state.json
+
+# Node.js / React
+frontend/node_modules/
+frontend/build/
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# System files
+# OS generated
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-```
+# Combined output (dev tool)
+combined_output.txt
