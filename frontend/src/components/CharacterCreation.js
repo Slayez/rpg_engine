@@ -1,13 +1,13 @@
 // frontend/src/components/CharacterCreation.js
 
-import React, { useState } from 'react';
-import { createWorld, generateStartSkills, chooseStartSkills, RACES } from '../api';
+import React, { useState, useEffect } from 'react';
+import { createWorld, generateStartSkills, chooseStartSkills, RACES, getConfig } from '../api';
 import { STAT_LABELS } from '../utils/statLabels';
 import SkillDescription from './SkillDescription';
 import './CharacterCreation.css';
 
 // Получаем количество навыков из API (должно совпадать с backend config)
-const MAX_START_SKILLS = 5;
+const DEFAULT_MAX_START_SKILLS = 5;
 
 const CATEGORY_ICONS = {
   "Магия огня": "🔥",
@@ -36,6 +36,21 @@ function CharacterCreation({ onCreated, onCancel }) {
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [maxStartSkills, setMaxStartSkills] = useState(DEFAULT_MAX_START_SKILLS);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const config = await getConfig();
+        if (config.start_skills_count) {
+          setMaxStartSkills(config.start_skills_count);
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки конфигурации:', err);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const handleNameRaceSubmit = async (e) => {
     e.preventDefault();
@@ -56,13 +71,13 @@ function CharacterCreation({ onCreated, onCancel }) {
     setSelectedSkills(prev => {
       const exists = prev.find(s => s.name === skill.name);
       if (exists) return prev.filter(s => s.name !== skill.name);
-      if (prev.length >= MAX_START_SKILLS) return prev;
+      if (prev.length >= maxStartSkills) return prev;
       return [...prev, skill];
     });
   };
 
   const handleFinalCreate = async () => {
-  if (selectedSkills.length !== MAX_START_SKILLS) { setError(`Выберите ровно ${MAX_START_SKILLS} навыка`); return; }
+  if (selectedSkills.length !== maxStartSkills) { setError(`Выберите ровно ${maxStartSkills} навыка`); return; }
     setLoading(true);
     setError('');
     try {
@@ -126,7 +141,7 @@ function CharacterCreation({ onCreated, onCancel }) {
 
         {step === 1 && (
           <div>
-            <p className="text-muted">Выберите 3 стартовых навыка</p>
+            <p className="text-muted">Выберите {maxStartSkills} стартовых навыка(ов)</p>
             {Object.entries(groupedSkills).map(([category, skills]) => (
               <div key={category} className="skill-category">
                 <h4 className="category-title">
@@ -152,7 +167,7 @@ function CharacterCreation({ onCreated, onCancel }) {
             {error && <div className="alert alert-danger">{error}</div>}
             <div className="d-flex justify-content-between mt-3">
               <button className="btn-outline" onClick={() => { setStep(0); setSelectedSkills([]); }}>Назад</button>
-              <button className="btn-primary" onClick={handleFinalCreate} disabled={loading || selectedSkills.length !== 3}>
+              <button className="btn-primary" onClick={handleFinalCreate} disabled={loading || selectedSkills.length !== maxStartSkills}>
                 {loading ? 'Создание...' : 'Начать приключение'}
               </button>
             </div>

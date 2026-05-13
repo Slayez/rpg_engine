@@ -8,6 +8,12 @@ export const RACES = [
   { id: 'slime', name: 'Слайм', description: 'Уникальные способности.', bonuses: { wisdom: 3, luck: 2, evasion: 5 } }
 ];
 
+
+export const getConfig = async () => {
+  const res = await fetch('/config');
+  if (!res.ok) throw new Error('Ошибка загрузки конфигурации');
+  return res.json();
+};
 export const getSaves = async () => {
   const res = await fetch('/saves');
   if (!res.ok) throw new Error('Ошибка загрузки сохранений');
