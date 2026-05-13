@@ -28,4 +28,42 @@ node_modules/
 dist/
 build/
 target/
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+venv/
+.venv/
+env/
+
+# Environment
+.env
+
+# ChromaDB persistent storage
+chroma_db/
+
+# World state save (game progress)
+world_state.json
+
+# Node.js / React
+frontend/node_modules/
+frontend/build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Combined output (dev tool)
+combined_output.txt
+
+
 ```
+
