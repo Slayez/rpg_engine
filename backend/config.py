@@ -1,3 +1,4 @@
+# backend/config.py
 import os
 from dotenv import load_dotenv
 
@@ -10,7 +11,7 @@ SAVES_DIR = os.getenv("SAVES_DIR", "./saves")
 
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 WORLD_SAVE_FILE = os.getenv("WORLD_SAVE_FILE", "./world_state.json")
-START_SKILLS_CHOICE_COUNT = int(os.getenv("START_SKILLS_CHOICE_COUNT", 5))
+START_SKILLS_CHOICE_COUNT = int(os.getenv("START_SKILLS_CHOICE_COUNT", "3"))
 
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", 8000))

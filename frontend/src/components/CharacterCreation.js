@@ -5,8 +5,9 @@ import { createWorld, generateStartSkills, chooseStartSkills, RACES } from '../a
 import { STAT_LABELS } from '../utils/statLabels';
 import SkillDescription from './SkillDescription';
 import './CharacterCreation.css';
-// В начале файла добавим или изменим существующую проверку
-const MAX_START_SKILLS = parseInt(process.env.REACT_APP_START_SKILLS_COUNT, 10) || 3;
+
+// Получаем количество навыков из API (должно совпадать с backend config)
+const MAX_START_SKILLS = 3;
 
 const CATEGORY_ICONS = {
   "Магия огня": "🔥",

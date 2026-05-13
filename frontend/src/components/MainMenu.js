@@ -5,17 +5,35 @@ import './MainMenu.css';
 function MainMenu({ onNewGame, onLoadWorld }) {
   const [saves, setSaves] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchSaves = async () => {
     setLoading(true);
-    try { setSaves(await getSaves() || []); } catch { setSaves([]); }
+    setError('');
+    try {
+      const data = await getSaves();
+      setSaves(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load saves:', err);
+      setError('Ошибка загрузки сохранений');
+      setSaves([]);
+    }
     setLoading(false);
   };
-  useEffect(() => { fetchSaves(); }, []);
+  
+  useEffect(() => { 
+    fetchSaves(); 
+  }, []);
 
   const handleDelete = async (slotId) => {
     if (!window.confirm('Удалить мир безвозвратно?')) return;
-    try { await deleteWorld(slotId); fetchSaves(); } catch { alert('Ошибка удаления'); }
+    try {
+      await deleteWorld(slotId);
+      fetchSaves();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert('Ошибка удаления: ' + err.message);
+    }
   };
 
   return (
@@ -27,12 +45,13 @@ function MainMenu({ onNewGame, onLoadWorld }) {
         <hr style={{ borderColor: 'var(--border)' }} />
         <h5 className="mb-3">Сохранения</h5>
         {loading ? <p className="text-muted">Загрузка...</p>
+          : error ? <p className="text-danger">{error}</p>
           : saves.length === 0 ? <p className="text-muted">Нет сохранений</p>
           : saves.map(save => (
               <div key={save.slot_id} className="save-card">
                 <div>
-                  <div style={{ fontWeight: 600 }}>{save.player_name}</div>
-                  <small className="text-muted">{save.race} · Уровень {save.level} · {save.location}</small>
+                  <div style={{ fontWeight: 600 }}>{save.player_name || 'Неизвестно'}</div>
+                  <small className="text-muted">{save.race || '???'} · Уровень {save.level || 1} · {save.location || '???'}</small>
                 </div>
                 <div className="d-flex gap-2">
                   <button className="btn-outline" onClick={() => onLoadWorld(save.slot_id)}>Загрузить</button>
