@@ -179,6 +179,14 @@ def get_scene(slot_id: str):
     except Exception as e:
         logger.error(f"Get scene error: {e}")
         return {"scene": None, "error": str(e)}
+
+@app.get("/config", response_model=dict)
+def get_game_config():
+    """Получение конфигурации игры"""
+    return {
+        "start_skills_count": config.START_SKILLS_CHOICE_COUNT
+    }
+
 # ========== API для тактического боя ==========
 
 @app.post("/combat/tactical/start")
